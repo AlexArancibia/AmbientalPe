@@ -1,36 +1,34 @@
 import { router } from "../trpc";
-import { accountLinkRouter } from "./accountLink";
-import { brokerRouter } from "./broker";
-import { companyInfoRouter } from "./companyInfo";
-import { paymentRouter } from "./payment";
-import { propfirmRouter } from "./propfirm";
-import { propfirmAccountTypeRouter } from "./propfirmAccountType";
-import { propfirmPhaseRouter } from "./propfirmPhase";
-import { propfirmRulesConfigRouter } from "./propfirmRulesConfig";
 import { rbacRouter } from "./rbac";
-import { subscriptionRouter } from "./subscription";
-import { symbolRouter } from "./symbol";
-import { symbolConfigRouter } from "./symbolConfig";
-import { tradeRouter } from "./trade";
-import { tradingAccountRouter } from "./tradingAccount";
 import { userRouter } from "./user";
+import { clientRouter } from "./client";
+import { equipmentRouter } from "./equipment";
+import { quotationRouter } from "./quotation";
+import { quotationItemRouter } from "./quotationItem";
+import { quotationItemTemplateRouter } from "./quotationItemTemplate";
+import { serviceOrderRouter } from "./serviceOrder";
+import { serviceOrderItemRouter } from "./serviceOrderItem";
+import { serviceOrderItemTemplateRouter } from "./serviceOrderItemTemplate";
+import { purchaseOrderRouter } from "./purchaseOrder";
+import { purchaseOrderItemRouter } from "./purchaseOrderItem";
+import { purchaseOrderItemTemplateRouter } from "./purchaseOrderItemTemplate";
+import { companyRouter } from "./company";
 
 export const appRouter = router({
   user: userRouter,
   rbac: rbacRouter,
-  subscription: subscriptionRouter,
-  payment: paymentRouter,
-  companyInfo: companyInfoRouter,
-  propfirm: propfirmRouter,
-  propfirmPhase: propfirmPhaseRouter,
-  propfirmAccountType: propfirmAccountTypeRouter,
-  propfirmRulesConfig: propfirmRulesConfigRouter,
-  broker: brokerRouter,
-  symbol: symbolRouter,
-  symbolConfig: symbolConfigRouter,
-  accountLink: accountLinkRouter,
-  tradingAccount: tradingAccountRouter,
-  trade: tradeRouter,
+  client: clientRouter,
+  equipment: equipmentRouter,
+  quotation: quotationRouter,
+  quotationItem: quotationItemRouter,
+  quotationItemTemplate: quotationItemTemplateRouter,
+  serviceOrder: serviceOrderRouter,
+  serviceOrderItem: serviceOrderItemRouter,
+  serviceOrderItemTemplate: serviceOrderItemTemplateRouter,
+  purchaseOrder: purchaseOrderRouter,
+  purchaseOrderItem: purchaseOrderItemRouter,
+  purchaseOrderItemTemplate: purchaseOrderItemTemplateRouter,
+  company: companyRouter,
 });
 
 export type AppRouter = typeof appRouter;

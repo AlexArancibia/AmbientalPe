@@ -17,6 +17,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     ctx: {
       ...ctx,
       user: ctx.user, // Now user is guaranteed to be defined
+      db: ctx.db, // Ensure db is passed through
     },
   });
 });
@@ -45,6 +46,7 @@ export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       user: ctx.user,
+      db: ctx.db,
     },
   });
 });
@@ -73,6 +75,7 @@ export const superAdminProcedure = t.procedure.use(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       user: ctx.user,
+      db: ctx.db,
     },
   });
 });

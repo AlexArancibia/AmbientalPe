@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import { AuthProvider } from "@/AuthContext";
-import { Footer } from "@/components/Footer";
 import GlobalNavbar from "@/components/GlobalNavbar";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
@@ -30,7 +29,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
         {GA_TRACKING_ID && <GoogleAnalytics gaTrackingId={GA_TRACKING_ID} />}
@@ -48,8 +47,9 @@ export default function RootLayout({
           <AuthProvider>
             <TRPCProvider>
               <GlobalNavbar />
-              <RoleBasedRedirect>{children}</RoleBasedRedirect>
-              <Footer />
+              <main className="">
+                <RoleBasedRedirect>{children}</RoleBasedRedirect>
+              </main>
               <Toaster />
             </TRPCProvider>
           </AuthProvider>

@@ -34,7 +34,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false, // Usuarios se crean directamente sin verificación
     sendResetPassword: async ({ user, url }) => {
       try {
         await sendResetPasswordEmail(user.email, url);
@@ -45,7 +45,7 @@ export const auth = betterAuth({
   },
 
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false, // No enviar emails de verificación al registrarse
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       try {

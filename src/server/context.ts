@@ -1,5 +1,7 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { initTRPC } from "@trpc/server";
+import type { PrismaClient } from "@prisma/client";
 
 export interface Context {
   user?: {
@@ -7,6 +9,7 @@ export interface Context {
     email: string;
     name: string;
   };
+  db: PrismaClient;
   rbac?: unknown;
 }
 
@@ -20,7 +23,9 @@ export const createContext = async (opts: {
     });
 
     if (!session?.user) {
-      return {};
+      return {
+        db: prisma,
+      };
     }
 
     return {
@@ -29,9 +34,12 @@ export const createContext = async (opts: {
         email: session.user.email,
         name: session.user.name,
       },
+      db: prisma,
     };
   } catch (_error) {
-    return {};
+    return {
+      db: prisma,
+    };
   }
 };
 

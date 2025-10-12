@@ -9,9 +9,13 @@ import {
   assignPermissionToRole,
   assignRole,
   canAccessAdmin,
+  canManageClients,
+  canManageCompany,
+  canManageEquipment,
+  canManagePurchaseOrders,
+  canManageQuotations,
   canManageRoles,
-  canManageTrades,
-  canManageTradingAccounts,
+  canManageServiceOrders,
   canManageUsers,
   canViewDashboard,
   createPermission,
@@ -417,18 +421,46 @@ export const rbacRouter = router({
       return await canAccessAdmin(input.userId);
     }),
 
-  // Check if user can manage trading accounts
-  canManageTradingAccounts: publicProcedure
+  // Check if user can manage clients
+  canManageClients: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      return await canManageTradingAccounts(input.userId);
+      return await canManageClients(input.userId);
     }),
 
-  // Check if user can manage trades
-  canManageTrades: publicProcedure
+  // Check if user can manage equipment
+  canManageEquipment: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      return await canManageTrades(input.userId);
+      return await canManageEquipment(input.userId);
+    }),
+
+  // Check if user can manage quotations
+  canManageQuotations: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      return await canManageQuotations(input.userId);
+    }),
+
+  // Check if user can manage service orders
+  canManageServiceOrders: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      return await canManageServiceOrders(input.userId);
+    }),
+
+  // Check if user can manage purchase orders
+  canManagePurchaseOrders: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      return await canManagePurchaseOrders(input.userId);
+    }),
+
+  // Check if user can manage company
+  canManageCompany: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      return await canManageCompany(input.userId);
     }),
 
   // Check if user can view dashboard

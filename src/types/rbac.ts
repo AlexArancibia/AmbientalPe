@@ -11,12 +11,12 @@ export enum PermissionResource {
   USER = "USER",
   ROLE = "ROLE",
   PERMISSION = "PERMISSION",
-  TRADING_ACCOUNT = "TRADING_ACCOUNT",
-  TRADE = "TRADE",
-  PROPFIRM = "PROPFIRM",
-  BROKER = "BROKER",
-  SYMBOL = "SYMBOL",
-  SUBSCRIPTION = "SUBSCRIPTION",
+  CLIENT = "CLIENT",
+  EQUIPMENT = "EQUIPMENT",
+  QUOTATION = "QUOTATION",
+  SERVICE_ORDER = "SERVICE_ORDER",
+  PURCHASE_ORDER = "PURCHASE_ORDER",
+  COMPANY = "COMPANY",
   DASHBOARD = "DASHBOARD",
   ADMIN = "ADMIN",
 }
@@ -92,8 +92,8 @@ export interface RBACContext {
 export const DEFAULT_ROLES = {
   SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
-  MODERATOR: "moderator",
-  TRADER: "trader",
+  MANAGER: "manager",
+  OPERATOR: "operator",
   VIEWER: "viewer",
 } as const;
 
@@ -143,136 +143,136 @@ export const DEFAULT_PERMISSIONS = {
     resource: PermissionResource.ROLE,
   },
 
-  // Trading account management
-  TRADING_ACCOUNT_CREATE: {
+  // Client management
+  CLIENT_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.TRADING_ACCOUNT,
+    resource: PermissionResource.CLIENT,
   },
-  TRADING_ACCOUNT_READ: {
+  CLIENT_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.TRADING_ACCOUNT,
+    resource: PermissionResource.CLIENT,
   },
-  TRADING_ACCOUNT_UPDATE: {
+  CLIENT_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.TRADING_ACCOUNT,
+    resource: PermissionResource.CLIENT,
   },
-  TRADING_ACCOUNT_DELETE: {
+  CLIENT_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.TRADING_ACCOUNT,
+    resource: PermissionResource.CLIENT,
   },
-  TRADING_ACCOUNT_MANAGE: {
+  CLIENT_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.TRADING_ACCOUNT,
+    resource: PermissionResource.CLIENT,
   },
 
-  // Trade management
-  TRADE_CREATE: {
+  // Equipment management
+  EQUIPMENT_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.TRADE,
+    resource: PermissionResource.EQUIPMENT,
   },
-  TRADE_READ: {
+  EQUIPMENT_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.TRADE,
+    resource: PermissionResource.EQUIPMENT,
   },
-  TRADE_UPDATE: {
+  EQUIPMENT_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.TRADE,
+    resource: PermissionResource.EQUIPMENT,
   },
-  TRADE_DELETE: {
+  EQUIPMENT_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.TRADE,
+    resource: PermissionResource.EQUIPMENT,
   },
-  TRADE_MANAGE: {
+  EQUIPMENT_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.TRADE,
+    resource: PermissionResource.EQUIPMENT,
   },
 
-  // Propfirm management
-  PROPFIRM_CREATE: {
+  // Quotation management
+  QUOTATION_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.PROPFIRM,
+    resource: PermissionResource.QUOTATION,
   },
-  PROPFIRM_READ: {
+  QUOTATION_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.PROPFIRM,
+    resource: PermissionResource.QUOTATION,
   },
-  PROPFIRM_UPDATE: {
+  QUOTATION_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.PROPFIRM,
+    resource: PermissionResource.QUOTATION,
   },
-  PROPFIRM_DELETE: {
+  QUOTATION_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.PROPFIRM,
+    resource: PermissionResource.QUOTATION,
   },
-  PROPFIRM_MANAGE: {
+  QUOTATION_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.PROPFIRM,
+    resource: PermissionResource.QUOTATION,
   },
 
-  // Broker management
-  BROKER_CREATE: {
+  // Service Order management
+  SERVICE_ORDER_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.BROKER,
+    resource: PermissionResource.SERVICE_ORDER,
   },
-  BROKER_READ: {
+  SERVICE_ORDER_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.BROKER,
+    resource: PermissionResource.SERVICE_ORDER,
   },
-  BROKER_UPDATE: {
+  SERVICE_ORDER_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.BROKER,
+    resource: PermissionResource.SERVICE_ORDER,
   },
-  BROKER_DELETE: {
+  SERVICE_ORDER_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.BROKER,
+    resource: PermissionResource.SERVICE_ORDER,
   },
-  BROKER_MANAGE: {
+  SERVICE_ORDER_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.BROKER,
+    resource: PermissionResource.SERVICE_ORDER,
   },
 
-  // Symbol management
-  SYMBOL_CREATE: {
+  // Purchase Order management
+  PURCHASE_ORDER_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.SYMBOL,
+    resource: PermissionResource.PURCHASE_ORDER,
   },
-  SYMBOL_READ: {
+  PURCHASE_ORDER_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.SYMBOL,
+    resource: PermissionResource.PURCHASE_ORDER,
   },
-  SYMBOL_UPDATE: {
+  PURCHASE_ORDER_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.SYMBOL,
+    resource: PermissionResource.PURCHASE_ORDER,
   },
-  SYMBOL_DELETE: {
+  PURCHASE_ORDER_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.SYMBOL,
+    resource: PermissionResource.PURCHASE_ORDER,
   },
-  SYMBOL_MANAGE: {
+  PURCHASE_ORDER_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.SYMBOL,
+    resource: PermissionResource.PURCHASE_ORDER,
   },
 
-  // Subscription management
-  SUBSCRIPTION_CREATE: {
+  // Company management
+  COMPANY_CREATE: {
     action: PermissionAction.CREATE,
-    resource: PermissionResource.SUBSCRIPTION,
+    resource: PermissionResource.COMPANY,
   },
-  SUBSCRIPTION_READ: {
+  COMPANY_READ: {
     action: PermissionAction.READ,
-    resource: PermissionResource.SUBSCRIPTION,
+    resource: PermissionResource.COMPANY,
   },
-  SUBSCRIPTION_UPDATE: {
+  COMPANY_UPDATE: {
     action: PermissionAction.UPDATE,
-    resource: PermissionResource.SUBSCRIPTION,
+    resource: PermissionResource.COMPANY,
   },
-  SUBSCRIPTION_DELETE: {
+  COMPANY_DELETE: {
     action: PermissionAction.DELETE,
-    resource: PermissionResource.SUBSCRIPTION,
+    resource: PermissionResource.COMPANY,
   },
-  SUBSCRIPTION_MANAGE: {
+  COMPANY_MANAGE: {
     action: PermissionAction.MANAGE,
-    resource: PermissionResource.SUBSCRIPTION,
+    resource: PermissionResource.COMPANY,
   },
 
   // Dashboard access

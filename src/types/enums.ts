@@ -1,66 +1,46 @@
 /**
- * Type-safe enums and constants for the application
+ * Type-safe enums and constants for AMBIENTALPE
  * Centralized management of all enum values and their types
  */
 
-// Trade Status Enum
-export const TRADE_STATUS = {
-  OPEN: "OPEN",
-  CLOSED: "CLOSED",
+// Company Type Enum
+export const COMPANY_TYPE = {
+  CLIENT: "CLIENT",
+  PROVIDER: "PROVIDER",
+} as const;
+
+// Order Status Enum
+export const ORDER_STATUS = {
+  DRAFT: "DRAFT",
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",
-  PARTIALLY_CLOSED: "PARTIALLY_CLOSED",
 } as const;
 
-// Entry Method Enum
-export const ENTRY_METHOD = {
-  MANUAL: "MANUAL",
-  API: "API",
-  COPY_TRADING: "COPY_TRADING",
+// Equipment Status Enum
+export const EQUIPMENT_STATUS = {
+  AVAILABLE: "AVAILABLE",
+  IN_USE: "IN_USE",
+  MAINTENANCE: "MAINTENANCE",
+  CALIBRATION: "CALIBRATION",
+  OUT_OF_SERVICE: "OUT_OF_SERVICE",
 } as const;
 
-// Trade Direction Enum
-export const TRADE_DIRECTION = {
-  BUY: "buy",
-  SELL: "sell",
+// Currency Enum
+export const CURRENCY = {
+  PEN: "PEN", // Soles Peruanos
+  USD: "USD", // Dólares
+  EUR: "EUR", // Euros
 } as const;
 
-// Account Type Enum
-export const ACCOUNT_TYPE = {
-  PROPFIRM: "PROPFIRM",
-  BROKER: "BROKER",
-} as const;
-
-// Symbol Category Enum
-export const SYMBOL_CATEGORY = {
-  FOREX: "FOREX",
-  STOCKS: "STOCKS",
-  CRYPTO: "CRYPTO",
-  COMMODITIES: "COMMODITIES",
-  INDICES: "INDICES",
-} as const;
-
-// Subscription Status Enum
-export const SUBSCRIPTION_STATUS = {
-  TRIALING: "TRIALING",
-  ACTIVE: "ACTIVE",
-  PAST_DUE: "PAST_DUE",
-  CANCELED: "CANCELED",
-  INCOMPLETE: "INCOMPLETE",
-} as const;
-
-// Payment Provider Enum
-export const PAYMENT_PROVIDER = {
-  STRIPE: "STRIPE",
-  PAYPAL: "PAYPAL",
-  MERCADOPAGO: "MERCADOPAGO",
-  CULQI: "CULQI",
-} as const;
-
-// User Role Enum
+// User Role Enum (System roles)
 export const USER_ROLE = {
   SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
-  TRADER: "trader",
+  MANAGER: "manager", // Gestor
+  OPERATOR: "operator", // Operador
   VIEWER: "viewer",
 } as const;
 
@@ -69,47 +49,65 @@ export const LANGUAGE = {
   EN: "EN",
   ES: "ES",
   PT: "PT",
-  FR: "FR",
+} as const;
+
+// Theme Enum
+export const THEME = {
+  LIGHT: "LIGHT",
+  DARK: "DARK",
+  AUTO: "AUTO",
+} as const;
+
+// Permission Action Enum
+export const PERMISSION_ACTION = {
+  CREATE: "CREATE",
+  READ: "READ",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+  MANAGE: "MANAGE",
+} as const;
+
+// Permission Resource Enum
+export const PERMISSION_RESOURCE = {
+  USER: "USER",
+  ROLE: "ROLE",
+  PERMISSION: "PERMISSION",
+  CLIENT: "CLIENT",
+  EQUIPMENT: "EQUIPMENT",
+  QUOTATION: "QUOTATION",
+  SERVICE_ORDER: "SERVICE_ORDER",
+  PURCHASE_ORDER: "PURCHASE_ORDER",
+  COMPANY: "COMPANY",
+  DASHBOARD: "DASHBOARD",
+  ADMIN: "ADMIN",
 } as const;
 
 // Type definitions derived from the constants
-export type TradeStatus = (typeof TRADE_STATUS)[keyof typeof TRADE_STATUS];
-export type EntryMethod = (typeof ENTRY_METHOD)[keyof typeof ENTRY_METHOD];
-export type TradeDirection =
-  (typeof TRADE_DIRECTION)[keyof typeof TRADE_DIRECTION];
-export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
-export type SymbolCategory =
-  (typeof SYMBOL_CATEGORY)[keyof typeof SYMBOL_CATEGORY];
-export type SubscriptionStatus =
-  (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
-export type PaymentProvider =
-  (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
+export type CompanyType = (typeof COMPANY_TYPE)[keyof typeof COMPANY_TYPE];
+export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
+export type EquipmentStatus = (typeof EQUIPMENT_STATUS)[keyof typeof EQUIPMENT_STATUS];
+export type Currency = (typeof CURRENCY)[keyof typeof CURRENCY];
 export type UserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];
 export type Language = (typeof LANGUAGE)[keyof typeof LANGUAGE];
+export type Theme = (typeof THEME)[keyof typeof THEME];
+export type PermissionAction = (typeof PERMISSION_ACTION)[keyof typeof PERMISSION_ACTION];
+export type PermissionResource = (typeof PERMISSION_RESOURCE)[keyof typeof PERMISSION_RESOURCE];
 
 // Helper functions for validation
-export const isValidTradeStatus = (status: string): status is TradeStatus => {
-  return Object.values(TRADE_STATUS).includes(status as TradeStatus);
+export const isValidCompanyType = (type: string): type is CompanyType => {
+  return Object.values(COMPANY_TYPE).includes(type as CompanyType);
 };
 
-export const isValidEntryMethod = (method: string): method is EntryMethod => {
-  return Object.values(ENTRY_METHOD).includes(method as EntryMethod);
+export const isValidOrderStatus = (status: string): status is OrderStatus => {
+  return Object.values(ORDER_STATUS).includes(status as OrderStatus);
 };
 
-export const isValidTradeDirection = (
-  direction: string
-): direction is TradeDirection => {
-  return Object.values(TRADE_DIRECTION).includes(direction as TradeDirection);
+export const isValidEquipmentStatus = (status: string): status is EquipmentStatus => {
+  return Object.values(EQUIPMENT_STATUS).includes(status as EquipmentStatus);
 };
 
-export const isValidAccountType = (type: string): type is AccountType => {
-  return Object.values(ACCOUNT_TYPE).includes(type as AccountType);
-};
-
-export const isValidSymbolCategory = (
-  category: string
-): category is SymbolCategory => {
-  return Object.values(SYMBOL_CATEGORY).includes(category as SymbolCategory);
+export const isValidCurrency = (currency: string): currency is Currency => {
+  return Object.values(CURRENCY).includes(currency as Currency);
 };
 
 export const isValidUserRole = (role: string): role is UserRole => {
@@ -118,4 +116,16 @@ export const isValidUserRole = (role: string): role is UserRole => {
 
 export const isValidLanguage = (lang: string): lang is Language => {
   return Object.values(LANGUAGE).includes(lang as Language);
+};
+
+export const isValidTheme = (theme: string): theme is Theme => {
+  return Object.values(THEME).includes(theme as Theme);
+};
+
+export const isValidPermissionAction = (action: string): action is PermissionAction => {
+  return Object.values(PERMISSION_ACTION).includes(action as PermissionAction);
+};
+
+export const isValidPermissionResource = (resource: string): resource is PermissionResource => {
+  return Object.values(PERMISSION_RESOURCE).includes(resource as PermissionResource);
 };

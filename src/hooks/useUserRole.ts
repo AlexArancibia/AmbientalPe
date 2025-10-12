@@ -5,7 +5,7 @@ import { useRBAC } from "@/hooks/useRBAC";
 import { useEffect, useState } from "react";
 
 export type UserRole =
-  | "trader"
+  | "operator"
   | "admin"
   | "viewer"
   | "super_admin"
@@ -22,11 +22,11 @@ export function useUserRole() {
       return;
     }
 
-    // Priority order: super_admin > admin > trader > viewer
+    // Priority order: super_admin > admin > operator > viewer
     const roleHierarchy: Record<string, UserRole> = {
       super_admin: "super_admin",
       admin: "admin",
-      trader: "trader",
+      operator: "operator",
       viewer: "viewer",
     };
 
@@ -44,12 +44,12 @@ export function useUserRole() {
         }
         if (mappedRole === "admin") {
           highestRole = "admin";
-        } else if (mappedRole === "trader") {
+        } else if (mappedRole === "operator") {
           if (highestRole === "viewer") {
-            highestRole = "trader";
+            highestRole = "operator";
           }
-        } else if (mappedRole === "viewer" && highestRole === "trader") {
-          // Keep trader role as it has higher priority than viewer
+        } else if (mappedRole === "viewer" && highestRole === "operator") {
+          // Keep operator role as it has higher priority than viewer
         }
       }
     }
@@ -60,7 +60,7 @@ export function useUserRole() {
   return {
     primaryRole,
     isLoading,
-    isTrader: primaryRole === "trader",
+    isOperator: primaryRole === "operator",
     isAdmin: ["admin", "super_admin"].includes(primaryRole),
     isSuperAdmin: primaryRole === "super_admin",
     isViewer: primaryRole === "viewer",

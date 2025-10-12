@@ -7,7 +7,7 @@ import {
 } from "@/types/rbac";
 
 export async function seedRBAC() {
-  // Create permissions
+  // Crear permisos
   const permissions = await Promise.all(
     Object.entries(DEFAULT_PERMISSIONS).map(async ([_key, permission]) => {
       const result = await prisma.permission.upsert({
@@ -28,76 +28,76 @@ export async function seedRBAC() {
     })
   );
 
-  // Create roles
+  // Crear roles
 
-  // Super Admin Role
+  // Rol de Super Administrador
   const superAdminRole = await prisma.role.upsert({
     where: { name: DEFAULT_ROLES.SUPER_ADMIN },
     update: {},
     create: {
       name: DEFAULT_ROLES.SUPER_ADMIN,
-      displayName: "Super Administrator",
-      description: "Full system access with all permissions",
+      displayName: "Super Administrador",
+      description: "Acceso completo al sistema con todos los permisos",
       isSystem: true,
       isActive: true,
     },
   });
 
-  // Admin Role
+  // Rol de Administrador
   const adminRole = await prisma.role.upsert({
     where: { name: DEFAULT_ROLES.ADMIN },
     update: {},
     create: {
       name: DEFAULT_ROLES.ADMIN,
-      displayName: "Administrator",
-      description: "Administrative access to most system features",
+      displayName: "Administrador",
+      description: "Acceso administrativo a la mayoría de funciones del sistema",
       isSystem: true,
       isActive: true,
     },
   });
 
-  // Moderator Role
-  const moderatorRole = await prisma.role.upsert({
-    where: { name: DEFAULT_ROLES.MODERATOR },
+  // Rol de Gerente
+  const managerRole = await prisma.role.upsert({
+    where: { name: DEFAULT_ROLES.MANAGER },
     update: {},
     create: {
-      name: DEFAULT_ROLES.MODERATOR,
-      displayName: "Moderator",
-      description: "Moderation access to user content and basic management",
+      name: DEFAULT_ROLES.MANAGER,
+      displayName: "Gerente",
+      description: "Acceso de gestión a operaciones de monitoreo ambiental y recursos",
       isSystem: true,
       isActive: true,
     },
   });
 
-  // Trader Role
-  const traderRole = await prisma.role.upsert({
-    where: { name: DEFAULT_ROLES.TRADER },
+  // Rol de Operador
+  const operatorRole = await prisma.role.upsert({
+    where: { name: DEFAULT_ROLES.OPERATOR },
     update: {},
     create: {
-      name: DEFAULT_ROLES.TRADER,
-      displayName: "Trader",
-      description: "Full trading access and account management",
+      name: DEFAULT_ROLES.OPERATOR,
+      displayName: "Operador",
+      description: "Acceso operacional a tareas diarias, órdenes de servicio y equipos",
       isSystem: true,
       isActive: true,
     },
   });
 
-  // Viewer Role
+  // Rol de Observador
   const viewerRole = await prisma.role.upsert({
     where: { name: DEFAULT_ROLES.VIEWER },
     update: {},
     create: {
       name: DEFAULT_ROLES.VIEWER,
-      displayName: "Viewer",
-      description: "Read-only access to basic features",
+      displayName: "Observador",
+      description: "Acceso de solo lectura a funciones básicas del sistema",
       isSystem: true,
       isActive: true,
     },
   });
 
-  // Assign permissions to roles
+  // Asignar permisos a roles
 
-  // Super Admin gets all permissions
+  // Super Admin obtiene todos los permisos
   for (const permission of permissions) {
     await prisma.rolePermission.upsert({
       where: {
@@ -114,7 +114,7 @@ export async function seedRBAC() {
     });
   }
 
-  // Admin gets most permissions except super admin specific ones
+  // Admin obtiene la mayoría de permisos excepto los específicos de super admin
   const adminPermissions = permissions.filter(
     (p) => !p.resource.includes("ROLE") || p.action !== PermissionAction.MANAGE
   );
@@ -134,66 +134,73 @@ export async function seedRBAC() {
     });
   }
 
-  // Moderator gets user management and basic permissions
-  const moderatorPermissions = permissions.filter(
+  // Manager obtiene permisos de gestión para recursos de monitoreo ambiental
+  const managerPermissions = permissions.filter(
     (p) =>
       (p.resource === PermissionResource.USER &&
         p.action !== PermissionAction.DELETE) ||
       p.resource === PermissionResource.DASHBOARD ||
-      (p.resource === PermissionResource.TRADE &&
+      p.resource === PermissionResource.CLIENT ||
+      p.resource === PermissionResource.EQUIPMENT ||
+      p.resource === PermissionResource.QUOTATION ||
+      (p.resource === PermissionResource.COMPANY &&
         p.action === PermissionAction.READ)
   );
-  for (const permission of moderatorPermissions) {
+  for (const permission of managerPermissions) {
     await prisma.rolePermission.upsert({
       where: {
         roleId_permissionId: {
-          roleId: moderatorRole.id,
+          roleId: managerRole.id,
           permissionId: permission.id,
         },
       },
       update: {},
       create: {
-        roleId: moderatorRole.id,
+        roleId: managerRole.id,
         permissionId: permission.id,
       },
     });
   }
 
-  // Trader gets trading-related permissions
-  const traderPermissions = permissions.filter(
+  // Operator obtiene permisos operacionales para órdenes de servicio y equipos
+  const operatorPermissions = permissions.filter(
     (p) =>
-      p.resource === PermissionResource.TRADING_ACCOUNT ||
-      p.resource === PermissionResource.TRADE ||
+      p.resource === PermissionResource.SERVICE_ORDER ||
+      p.resource === PermissionResource.PURCHASE_ORDER ||
+      p.resource === PermissionResource.EQUIPMENT ||
       p.resource === PermissionResource.DASHBOARD ||
-      p.resource === PermissionResource.SYMBOL ||
-      p.resource === PermissionResource.PROPFIRM ||
-      p.resource === PermissionResource.BROKER
+      (p.resource === PermissionResource.CLIENT &&
+        p.action === PermissionAction.READ) ||
+      (p.resource === PermissionResource.QUOTATION &&
+        (p.action === PermissionAction.READ ||
+          p.action === PermissionAction.CREATE))
   );
-  for (const permission of traderPermissions) {
+  for (const permission of operatorPermissions) {
     await prisma.rolePermission.upsert({
       where: {
         roleId_permissionId: {
-          roleId: traderRole.id,
+          roleId: operatorRole.id,
           permissionId: permission.id,
         },
       },
       update: {},
       create: {
-        roleId: traderRole.id,
+        roleId: operatorRole.id,
         permissionId: permission.id,
       },
     });
   }
 
-  // Viewer gets read-only permissions
+  // Viewer obtiene permisos de solo lectura
   const viewerPermissions = permissions.filter(
     (p) =>
       p.action === PermissionAction.READ &&
       (p.resource === PermissionResource.DASHBOARD ||
-        p.resource === PermissionResource.TRADE ||
-        p.resource === PermissionResource.SYMBOL ||
-        p.resource === PermissionResource.PROPFIRM ||
-        p.resource === PermissionResource.BROKER)
+        p.resource === PermissionResource.CLIENT ||
+        p.resource === PermissionResource.EQUIPMENT ||
+        p.resource === PermissionResource.QUOTATION ||
+        p.resource === PermissionResource.SERVICE_ORDER ||
+        p.resource === PermissionResource.PURCHASE_ORDER)
   );
   for (const permission of viewerPermissions) {
     await prisma.rolePermission.upsert({
@@ -211,7 +218,7 @@ export async function seedRBAC() {
     });
   }
 
-  // Assign default role to existing users
+  // Asignar rol por defecto a usuarios existentes
   const existingUsers = await prisma.user.findMany({
     where: {
       userRoles: {
@@ -221,22 +228,22 @@ export async function seedRBAC() {
   });
 
   for (const user of existingUsers) {
-    // Assign trader role by default
+    // Asignar rol de operador por defecto
     await prisma.userRole.create({
       data: {
         userId: user.id,
-        roleId: traderRole.id,
+        roleId: operatorRole.id,
       },
     });
   }
 
   return {
-    roles: [superAdminRole, adminRole, moderatorRole, traderRole, viewerRole],
+    roles: [superAdminRole, adminRole, managerRole, operatorRole, viewerRole],
     permissions: permissions.length,
   };
 }
 
-// Run seed if this file is executed directly
+// Ejecutar seed si este archivo se ejecuta directamente
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedRBAC()
     .then(() => {

@@ -8,7 +8,6 @@ export type * from "./auth";
 export type * from "./connection";
 // Export all enums and types
 export * from "./enums";
-export type * from "./rbac";
 export type * from "./request";
 export type * from "./response";
 export type * from "./session";

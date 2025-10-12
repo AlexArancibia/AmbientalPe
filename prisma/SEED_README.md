@@ -1,48 +1,41 @@
-# Seed Completo de Base de Datos - Feniz Trading Platform
+# Seed Completo de Base de Datos - Sistema de Monitoreo Ambiental
 
 Este archivo contiene un seed completo que **elimina todos los datos existentes** y crea un sistema completo desde cero con usuarios de todos los tipos.
 
 ## 📋 Datos Incluidos
 
 ### 🏢 Infraestructura Base
-- **Empresa**: Información completa de Feniz Trading Platform
-- **PropFirms**: FTMO, MyForexFunds, The Funded Trader
-- **Brokers**: OANDA, IC Markets, Pepperstone
-- **Símbolos**: 14 símbolos (Forex, Crypto, Commodities, Indices)
+- **Empresa**: Información completa de la empresa de monitoreo ambiental
+- **Clientes**: Empresas y contactos registrados
+- **Proveedores**: Proveedores de insumos y servicios
+- **Equipos**: Equipos de monitoreo y su estado
 
 ### 👥 Usuarios de Todos los Tipos (8 usuarios)
 
-| Usuario | Email | Contraseña | Rol | Idioma | Riesgo | Suscripción |
-|---------|-------|------------|-----|--------|--------|-------------|
-| **Super Admin** | `superadmin@feniz.com` | `SuperAdmin123!@#` | super_admin | EN | 0.0% | Premium |
-| **Admin User** | `admin@feniz.com` | `Admin123!@#` | admin | EN | 0.5% | Premium |
-| **Moderator User** | `moderator@feniz.com` | `Moderator123!@#` | moderator | ES | 1.0% | Premium |
-| **Alex Trader** | `trader@feniz.com` | `Trader123!@#` | trader | ES | 1.5% | Premium |
-| **Maria Rodriguez** | `maria@feniz.com` | `Maria123!@#` | trader | ES | 2.0% | Premium |
-| **John Smith** | `john@feniz.com` | `John123!@#` | trader | EN | 1.0% | Premium |
-| **Ana Silva** | `ana@feniz.com` | `Ana123!@#` | trader | PT | 1.8% | Premium |
-| **Viewer User** | `viewer@feniz.com` | `Viewer123!@#` | viewer | EN | 0.0% | Free |
+| Usuario | Email | Contraseña | Rol | Idioma | Nivel |
+|---------|-------|------------|-----|--------|-------|
+| **Super Admin** | `superadmin@ambiental.com` | `SuperAdmin123!@#` | super_admin | ES | Alto |
+| **Admin User** | `admin@ambiental.com` | `Admin123!@#` | admin | ES | Alto |
+| **Operador 1** | `operador@ambiental.com` | `Operador123!@#` | operator | ES | Medio |
+| **Maria Rodriguez** | `maria@ambiental.com` | `Maria123!@#` | operator | ES | Medio |
+| **John Smith** | `john@ambiental.com` | `John123!@#` | operator | ES | Medio |
+| **Ana Silva** | `ana@ambiental.com` | `Ana123!@#` | operator | ES | Medio |
+| **Viewer User** | `viewer@ambiental.com` | `Viewer123!@#` | viewer | ES | Básico |
 
 ### 🔐 Sistema RBAC Completo
-- **5 Roles**: super_admin, admin, moderator, trader, viewer
+- **4 Roles**: super_admin, admin, operator, viewer
 - **Permisos**: 50+ permisos granulares por recurso
-- **Jerarquía**: Super Admin > Admin > Moderator > Trader > Viewer
+- **Jerarquía**: Super Admin > Admin > Operator > Viewer
 
-### 💼 Cuentas de Trading (para el primer trader)
-1. **FTMO 10K Challenge** - Cuenta de evaluación ($10,250.75)
-2. **FTMO 25K Funded** - Cuenta fondeada ($26,750.25)
-3. **OANDA Live Account** - Cuenta de broker ($5,234.50)
-4. **IC Markets Live** - Cuenta de broker ($3,156.80)
+### 📋 Órdenes de Servicio
+- Órdenes de servicio ambiental registradas
+- Estados: Pendiente, En Proceso, Completada
+- Asignación de equipos y personal
 
-### 🔗 Conexiones (Account Links)
-1. **FTMO 25K → OANDA** - Copia automática (2% riesgo)
-2. **FTMO 10K → IC Markets** - Copia manual (1.5% riesgo)
-
-### 📊 Trades
-- **Total**: 40 trades
-- **Por conexión**: 20 trades cada una
-- **Distribución**: 60% trades ganadores
-- **Período**: Últimos 30 días
+### 📊 Cotizaciones
+- Cotizaciones generadas para clientes
+- Estados: Borrador, Enviada, Aceptada, Rechazada
+- Histórico de cotizaciones
 
 ## 🚀 Cómo Ejecutar
 
@@ -101,41 +94,36 @@ pnpm db:studio
 Después de ejecutar el seed, deberías ver:
 
 - ✅ 1 registro en `CompanyInfo`
-- ✅ 5 roles con permisos granulares
-- ✅ 3 propfirms con fases y tipos de cuenta
-- ✅ 3 brokers con configuraciones de símbolos
-- ✅ 14 símbolos en múltiples categorías
-- ✅ **8 usuarios** (1 super admin, 1 admin, 1 moderator, 4 traders, 1 viewer)
-- ✅ 4 cuentas de trading activas (para el primer trader)
-- ✅ 2 conexiones entre cuentas
-- ✅ 40 trades distribuidos en las últimas 4 semanas
+- ✅ 4 roles con permisos granulares
+- ✅ Clientes registrados con información completa
+- ✅ Proveedores con datos de contacto
+- ✅ Equipos de monitoreo categorizados
+- ✅ **7 usuarios** (1 super admin, 1 admin, 4 operadores, 1 viewer)
+- ✅ Órdenes de servicio con diferentes estados
+- ✅ Cotizaciones generadas
+- ✅ Items de plantillas configurados
 
 ## 🔐 Credenciales de Acceso
 
 ### 👑 Super Admin
-- **Email**: `superadmin@feniz.com`
+- **Email**: `superadmin@ambiental.com`
 - **Contraseña**: `SuperAdmin123!@#`
 - **Permisos**: Acceso completo al sistema
 
 ### 👨‍💼 Admin
-- **Email**: `admin@feniz.com`
+- **Email**: `admin@ambiental.com`
 - **Contraseña**: `Admin123!@#`
 - **Permisos**: Gestión de usuarios y configuración del sistema
 
-### 👨‍🔧 Moderator
-- **Email**: `moderator@feniz.com`
-- **Contraseña**: `Moderator123!@#`
-- **Permisos**: Gestión básica de usuarios y monitoreo
-
-### 👨‍💻 Traders (4 usuarios)
-- **Alex**: `trader@feniz.com` / `Trader123!@#`
-- **Maria**: `maria@feniz.com` / `Maria123!@#`
-- **John**: `john@feniz.com` / `John123!@#`
-- **Ana**: `ana@feniz.com` / `Ana123!@#`
-- **Permisos**: Acceso completo a trading y gestión de cuentas
+### 👨‍💻 Operadores (4 usuarios)
+- **Operador**: `operador@ambiental.com` / `Operador123!@#`
+- **Maria**: `maria@ambiental.com` / `Maria123!@#`
+- **John**: `john@ambiental.com` / `John123!@#`
+- **Ana**: `ana@ambiental.com` / `Ana123!@#`
+- **Permisos**: Gestión de órdenes, equipos y cotizaciones
 
 ### 👁️ Viewer
-- **Email**: `viewer@feniz.com`
+- **Email**: `viewer@ambiental.com`
 - **Contraseña**: `Viewer123!@#`
 - **Permisos**: Solo lectura de datos básicos
 
@@ -144,8 +132,8 @@ Después de ejecutar el seed, deberías ver:
 Para modificar los datos del seed:
 
 1. **Cambiar datos de usuarios**: Edita el array `users` en la sección "USER CREATION"
-2. **Agregar más propfirms/brokers**: Modifica los arrays en las secciones correspondientes
-3. **Cambiar número de trades**: Modifica el bucle en la sección "TRADES GENERATION"
+2. **Agregar más clientes/proveedores**: Modifica los arrays en las secciones correspondientes
+3. **Cambiar equipos**: Modifica el array de equipos de monitoreo
 4. **Ajustar permisos**: Modifica las secciones de asignación de permisos por rol
 
 ## 📝 Notas Importantes
@@ -177,14 +165,14 @@ Para modificar los datos del seed:
 ## 🎯 Casos de Uso
 
 ### Para Desarrollo
-- Usa `trader@feniz.com` para testing de funcionalidades de trading
-- Usa `admin@feniz.com` para testing de administración
-- Usa `viewer@feniz.com` para testing de permisos de solo lectura
+- Usa `operador@ambiental.com` para testing de funcionalidades operativas
+- Usa `admin@ambiental.com` para testing de administración
+- Usa `viewer@ambiental.com` para testing de permisos de solo lectura
 
 ### Para Testing
-- Usa `superadmin@feniz.com` para testing completo del sistema
-- Usa diferentes traders para testing de múltiples usuarios
-- Usa `moderator@feniz.com` para testing de roles intermedios
+- Usa `superadmin@ambiental.com` para testing completo del sistema
+- Usa diferentes operadores para testing de múltiples usuarios
+- Usa diferentes roles para testing de permisos
 
 ## 📞 Soporte
 

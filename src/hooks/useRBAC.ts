@@ -69,22 +69,43 @@ export function useRBAC() {
     );
   }, [userPermissions]);
 
-  const canManageTradingAccounts = useMemo(() => {
+  const canManageClients = useMemo(() => {
     if (!userPermissions.length) return false;
     return userPermissions.some(
       (permission) =>
         permission.action === PermissionAction.MANAGE &&
-        permission.resource === PermissionResource.TRADING_ACCOUNT &&
+        permission.resource === PermissionResource.CLIENT &&
         permission.isActive
     );
   }, [userPermissions]);
 
-  const canManageTrades = useMemo(() => {
+  const canManageEquipment = useMemo(() => {
     if (!userPermissions.length) return false;
     return userPermissions.some(
       (permission) =>
         permission.action === PermissionAction.MANAGE &&
-        permission.resource === PermissionResource.TRADE &&
+        permission.resource === PermissionResource.EQUIPMENT &&
+        permission.isActive
+    );
+  }, [userPermissions]);
+
+  const canManageQuotations = useMemo(() => {
+    if (!userPermissions.length) return false;
+    return userPermissions.some(
+      (permission) =>
+        permission.action === PermissionAction.MANAGE &&
+        permission.resource === PermissionResource.QUOTATION &&
+        permission.isActive
+    );
+  }, [userPermissions]);
+
+  const canManageOrders = useMemo(() => {
+    if (!userPermissions.length) return false;
+    return userPermissions.some(
+      (permission) =>
+        permission.action === PermissionAction.MANAGE &&
+        (permission.resource === PermissionResource.SERVICE_ORDER ||
+          permission.resource === PermissionResource.PURCHASE_ORDER) &&
         permission.isActive
     );
   }, [userPermissions]);
@@ -174,8 +195,10 @@ export function useRBAC() {
     canManageUsers,
     canManageRoles,
     canAccessAdmin,
-    canManageTradingAccounts,
-    canManageTrades,
+    canManageClients,
+    canManageEquipment,
+    canManageQuotations,
+    canManageOrders,
     canViewDashboard,
 
     // Loading state

@@ -106,8 +106,8 @@ export const auth = betterAuth({
       process.env.NODE_ENV === "production"
         ? [
             process.env.SITE_URL!,
-            "https://feniz.emetstudio.com",
-            "https://www.feniz.emetstudio.com",
+            "https://ambientalpe.emetstudio.com",
+            "https://www.ambientalpe.emetstudio.com",
           ]
         : ["http://localhost:3000"],
   },

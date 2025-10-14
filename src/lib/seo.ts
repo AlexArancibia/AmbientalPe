@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 
 export const defaultMetadata: Metadata = {
   title: {
-    default: "MiApp - Plataforma de Productividad",
-    template: "%s | MiApp",
+    default: "AMBIENTALPE - Sistema de Monitoreo Ambiental",
+    template: "%s | AMBIENTALPE",
   },
   description:
-    "Una plataforma moderna para gestionar proyectos, colaborar en equipo y alcanzar tus objetivos con herramientas diseñadas para el éxito.",
+    "Sistema integral de gestión y monitoreo ambiental para empresas. Gestión de equipos, cotizaciones, órdenes de servicio y reportes de cumplimiento ambiental.",
   keywords: [
-    "productividad",
-    "gestión de proyectos",
-    "colaboración",
-    "equipo",
-    "objetivos",
-    "herramientas",
-    "plataforma",
+    "monitoreo ambiental",
+    "gestión ambiental",
+    "equipos ambientales",
+    "cotizaciones",
+    "órdenes de servicio",
+    "reportes ambientales",
+    "cumplimiento ambiental",
+    "calibración equipos",
   ],
-  authors: [{ name: "MiApp Team" }],
-  creator: "MiApp",
-  publisher: "MiApp",
+  authors: [{ name: "AMBIENTALPE Team" }],
+  creator: "AMBIENTALPE",
+  publisher: "AMBIENTALPE",
   formatDetection: {
     email: false,
     address: false,
@@ -32,26 +33,26 @@ export const defaultMetadata: Metadata = {
     type: "website",
     locale: "es_ES",
     url: process.env.SITE_URL!,
-    title: "MiApp - Plataforma de Productividad",
+    title: "AMBIENTALPE - Sistema de Monitoreo Ambiental",
     description:
-      "Una plataforma moderna para gestionar proyectos, colaborar en equipo y alcanzar tus objetivos.",
-    siteName: "MiApp",
+      "Sistema integral de gestión y monitoreo ambiental para empresas. Gestión de equipos, cotizaciones y reportes de cumplimiento.",
+    siteName: "AMBIENTALPE",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "MiApp - Plataforma de Productividad",
+        alt: "AMBIENTALPE - Sistema de Monitoreo Ambiental",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MiApp - Plataforma de Productividad",
+    title: "AMBIENTALPE - Sistema de Monitoreo Ambiental",
     description:
-      "Una plataforma moderna para gestionar proyectos, colaborar en equipo y alcanzar tus objetivos.",
+      "Sistema integral de gestión y monitoreo ambiental para empresas. Gestión de equipos, cotizaciones y reportes de cumplimiento.",
     images: ["/og-image.jpg"],
-    creator: "@miapp",
+    creator: "@ambientalpe",
   },
   robots: {
     index: true,
@@ -83,7 +84,7 @@ export function generateMetadata({
   image?: string;
 }): Metadata {
   return {
-    title: title ? `${title} | MiApp` : defaultMetadata.title,
+    title: title ? `${title} | AMBIENTALPE` : defaultMetadata.title,
     description: description || defaultMetadata.description,
     keywords: keywords || defaultMetadata.keywords,
     openGraph: {

@@ -353,6 +353,8 @@ export const commonStyles = StyleSheet.create({
   },
 });
 
+export type BadgeStyle = typeof commonStyles.badgePending;
+
 // Utilidades para formatear
 export const formatUtils = {
   currency: (amount: number, currency: string = 'PEN') => {

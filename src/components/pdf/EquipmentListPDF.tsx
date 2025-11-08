@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
 import { commonStyles, formatUtils } from './shared/pdf-styles';
+import type { BadgeStyle } from './shared/pdf-styles';
 
 const styles = StyleSheet.create({
   colCode: { width: '12%' },
@@ -38,8 +39,6 @@ interface EquipmentListPDFProps {
   };
   company?: CompanySummary;
 }
-
-type BadgeStyle = typeof commonStyles.badgePending;
 
 const statusMap: Record<string, { label: string; style: BadgeStyle }> = {
   available: { label: 'Disponible', style: commonStyles.badgeCompleted },

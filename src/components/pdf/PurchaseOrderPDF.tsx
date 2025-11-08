@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
 import { commonStyles, formatUtils } from './shared/pdf-styles';
+import type { BadgeStyle } from './shared/pdf-styles';
 
 const styles = StyleSheet.create({
   infoGrid: {
@@ -71,10 +72,7 @@ interface PurchaseOrderPDFProps {
   company?: CompanySummary;
 }
 
-const statusStyles: Record<
-  string,
-  { label: string; style: object }
-> = {
+const statusStyles: Record<string, { label: string; style: BadgeStyle }> = {
   pending: { label: 'PENDIENTE', style: commonStyles.badgePending },
   in_progress: { label: 'EN PROGRESO', style: commonStyles.badgeInProgress },
   completed: { label: 'COMPLETADA', style: commonStyles.badgeCompleted },

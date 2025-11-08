@@ -101,6 +101,8 @@ interface QuotationPDFProps {
       phone: string;
       logo?: string | null;
       bankAccounts?: PdfBankAccount[];
+      primaryColor?: string | null;
+      secondaryColor?: string | null;
     };
   };
 }

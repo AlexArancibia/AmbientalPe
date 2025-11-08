@@ -1,149 +1,26 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { PDFHeader } from './shared/PDFHeader';
+import { PDFFooter } from './shared/PDFFooter';
+import { commonStyles, formatUtils } from './shared/pdf-styles';
 
-// Estilos para el PDF
 const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontSize: 9,
-    fontFamily: 'Helvetica',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderBottom: '2 solid #1e3a8a',
-    paddingBottom: 12,
-  },
-  logoContainer: {
-    width: 100,
-    height: 40,
-    backgroundColor: '#1e3a8a',
-    padding: 6,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: 3,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: '#64748b',
-  },
-  summarySection: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 4,
-    border: '1 solid #e2e8f0',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 3,
-  },
-  summaryLabel: {
-    fontWeight: 'bold',
-    color: '#475569',
-    fontSize: 9,
-  },
-  summaryValue: {
-    color: '#1e3a8a',
-    fontWeight: 'bold',
-    fontSize: 9,
-  },
-  table: {
-    width: '100%',
-    marginTop: 8,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
-    padding: 6,
-    fontWeight: 'bold',
-    fontSize: 8,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 7,
-  },
-  tableRowAlt: {
-    flexDirection: 'row',
-    backgroundColor: '#f8fafc',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 7,
-  },
-  col1: { width: '12%' },
-  col2: { width: '22%' },
-  col3: { width: '18%' },
-  col4: { width: '13%' },
-  col5: { width: '15%' },
-  col6: { width: '20%' },
-  footer: {
-    position: 'absolute',
-    bottom: 25,
-    left: 30,
-    right: 30,
-    textAlign: 'center',
-    color: '#94a3b8',
-    fontSize: 7,
-    borderTop: '1 solid #e2e8f0',
-    paddingTop: 8,
-  },
-  pageNumber: {
-    position: 'absolute',
-    bottom: 10,
-    right: 30,
-    fontSize: 7,
-    color: '#94a3b8',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: 30,
-    color: '#94a3b8',
-    fontSize: 10,
-  },
-  statusBadge: {
-    padding: 2,
-    borderRadius: 2,
-    fontSize: 7,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  statusAvailable: {
-    backgroundColor: '#dcfce7',
-    color: '#166534',
-  },
-  statusInUse: {
-    backgroundColor: '#dbeafe',
-    color: '#1e3a8a',
-  },
-  statusMaintenance: {
-    backgroundColor: '#fef3c7',
-    color: '#92400e',
-  },
-  statusInactive: {
-    backgroundColor: '#f1f5f9',
-    color: '#64748b',
-  },
+  colCode: { width: '12%' },
+  colName: { width: '22%' },
+  colType: { width: '18%' },
+  colStatus: { width: '14%' },
+  colSerial: { width: '14%' },
+  colDescription: { width: '20%' },
 });
+
+interface CompanySummary {
+  name: string;
+  ruc: string;
+  address: string;
+  email: string;
+  phone: string;
+  logo?: string | null;
+}
 
 interface EquipmentListPDFProps {
   equipment: Array<{
@@ -159,141 +36,128 @@ interface EquipmentListPDFProps {
     status?: string;
     search?: string;
   };
+  company?: CompanySummary;
 }
 
-export const EquipmentListPDF: React.FC<EquipmentListPDFProps> = ({ equipment, filters }) => {
-  const formatDate = () => {
-    return new Date().toLocaleDateString('es-PE', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+const statusMap: Record<string, { label: string; style: object }> = {
+  available: { label: 'Disponible', style: commonStyles.badgeCompleted },
+  in_use: { label: 'En uso', style: commonStyles.badgeInProgress },
+  maintenance: { label: 'Mantenimiento', style: commonStyles.badgePending },
+  inactive: { label: 'Inactivo', style: commonStyles.badgeDraft },
+};
 
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'available':
-      case 'disponible':
-        return styles.statusAvailable;
-      case 'in_use':
-      case 'en_uso':
-        return styles.statusInUse;
-      case 'maintenance':
-      case 'mantenimiento':
-        return styles.statusMaintenance;
-      default:
-        return styles.statusInactive;
-    }
-  };
+const resolveStatus = (status: string) => {
+  const key = status.toLowerCase();
+  if (statusMap[key]) {
+    return statusMap[key];
+  }
 
-  const getStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      available: 'DISPONIBLE',
-      in_use: 'EN USO',
-      maintenance: 'MANTENIMIENTO',
-      inactive: 'INACTIVO',
-    };
-    return statusMap[status.toLowerCase()] || status.toUpperCase();
-  };
+  return { label: status.toUpperCase(), style: commonStyles.badgePending };
+};
 
-  const statusCounts = equipment.reduce((acc, eq) => {
-    const status = eq.status.toLowerCase();
-    acc[status] = (acc[status] || 0) + 1;
+export const EquipmentListPDF: React.FC<EquipmentListPDFProps> = ({ equipment, filters, company }) => {
+  const statusCounts = equipment.reduce<Record<string, number>>((acc, item) => {
+    const key = item.status.toLowerCase();
+    acc[key] = (acc[key] ?? 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              src={`${process.cwd()}/public/logo.png`}
-              style={styles.logo}
-            />
-          </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.title}>INVENTARIO DE EQUIPOS</Text>
-            <Text style={styles.subtitle}>Generado: {formatDate()}</Text>
-          </View>
-        </View>
+      <Page size="A4" style={commonStyles.page}>
+        <PDFHeader
+          company={company}
+          documentTitle="INVENTARIO DE EQUIPOS"
+          documentDate={formatUtils.currentDate()}
+          showCompanyInfo={false}
+        />
 
-        {/* Summary */}
-        <View style={styles.summarySection}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total de Equipos:</Text>
-            <Text style={styles.summaryValue}>{equipment.length}</Text>
+        <View style={commonStyles.summarySection}>
+          <View style={commonStyles.summaryRow}>
+            <Text style={commonStyles.summaryLabel}>Total de Equipos:</Text>
+            <Text style={commonStyles.summaryValue}>{equipment.length}</Text>
           </View>
-          {Object.entries(statusCounts).map(([status, count]) => (
-            <View key={status} style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{getStatusText(status)}:</Text>
-              <Text style={styles.summaryValue}>{count}</Text>
-            </View>
-          ))}
+          {Object.entries(statusCounts).map(([status, count]) => {
+            const statusInfo = resolveStatus(status);
+            return (
+              <View key={status} style={commonStyles.summaryRow}>
+                <Text style={commonStyles.summaryLabel}>{statusInfo.label}:</Text>
+                <Text style={commonStyles.summaryValue}>{count}</Text>
+              </View>
+            );
+          })}
           {filters?.type && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Filtro Tipo:</Text>
-              <Text style={styles.summaryValue}>{filters.type}</Text>
+            <View style={commonStyles.summaryRow}>
+              <Text style={commonStyles.summaryLabel}>Tipo filtrado:</Text>
+              <Text style={commonStyles.summaryValue}>{filters.type}</Text>
+            </View>
+          )}
+          {filters?.status && (
+            <View style={commonStyles.summaryRow}>
+              <Text style={commonStyles.summaryLabel}>Estado filtrado:</Text>
+              <Text style={commonStyles.summaryValue}>{resolveStatus(filters.status).label}</Text>
             </View>
           )}
           {filters?.search && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Búsqueda:</Text>
-              <Text style={styles.summaryValue}>{filters.search}</Text>
+            <View style={commonStyles.summaryRow}>
+              <Text style={commonStyles.summaryLabel}>Búsqueda:</Text>
+              <Text style={commonStyles.summaryValue}>{filters.search}</Text>
             </View>
           )}
         </View>
 
-        {/* Table */}
         {equipment.length > 0 ? (
-          <View style={styles.table}>
-            {/* Header */}
-            <View style={styles.tableHeader}>
-              <Text style={styles.col1}>Código</Text>
-              <Text style={styles.col2}>Nombre</Text>
-              <Text style={styles.col3}>Tipo</Text>
-              <Text style={styles.col4}>Estado</Text>
-              <Text style={styles.col5}>N° Serie</Text>
-              <Text style={styles.col6}>Descripción</Text>
-            </View>
-            {/* Rows */}
-            {equipment.map((item, index) => (
-              <View
-                key={index}
-                style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
-              >
-                <Text style={styles.col1}>{item.code}</Text>
-                <Text style={styles.col2}>{item.name}</Text>
-                <Text style={styles.col3}>{item.type}</Text>
-                <View style={[styles.col4, { flexDirection: 'row' }]}>
-                  <View style={[styles.statusBadge, getStatusStyle(item.status)]}>
-                    <Text>{getStatusText(item.status)}</Text>
-                  </View>
-                </View>
-                <Text style={styles.col5}>{item.serialNumber || 'N/A'}</Text>
-                <Text style={styles.col6}>{item.description}</Text>
+          <>
+            <Text style={commonStyles.sectionTitle}>DETALLE DE EQUIPOS</Text>
+            <View style={commonStyles.table}>
+              <View style={commonStyles.tableHeader}>
+                <Text style={styles.colCode}>Código</Text>
+                <Text style={styles.colName}>Nombre</Text>
+                <Text style={styles.colType}>Tipo</Text>
+                <Text style={styles.colStatus}>Estado</Text>
+                <Text style={styles.colSerial}>N° Serie</Text>
+                <Text style={styles.colDescription}>Descripción</Text>
               </View>
-            ))}
-          </View>
+              {equipment.map((item, index) => {
+                const statusInfo = resolveStatus(item.status);
+                return (
+                  <View
+                    key={`${item.code}-${index}`}
+                    style={index % 2 === 0 ? commonStyles.tableRow : commonStyles.tableRowAlt}
+                  >
+                    <Text style={styles.colCode}>{item.code}</Text>
+                    <Text style={styles.colName}>{item.name}</Text>
+                    <Text style={styles.colType}>{item.type}</Text>
+                    <View style={styles.colStatus}>
+                      <View style={[commonStyles.badge, statusInfo.style]}>
+                        <Text>{statusInfo.label}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.colSerial}>{item.serialNumber || 'N/A'}</Text>
+                    <Text style={styles.colDescription}>{item.description}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </>
         ) : (
-          <View style={styles.emptyState}>
+          <View style={commonStyles.emptyState}>
             <Text>No hay equipos registrados para mostrar.</Text>
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Inventario generado automáticamente - AmbientalPE</Text>
-          <Text style={{ marginTop: 3 }}>
-            Para más información, contáctenos a través de nuestros canales oficiales.
-          </Text>
-        </View>
-
-        {/* Page Number */}
-        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
-          `Página ${pageNumber} de ${totalPages}`
-        )} fixed />
+        <PDFFooter
+          company={
+            company
+              ? {
+                  name: company.name,
+                  email: company.email,
+                  phone: company.phone,
+                }
+              : undefined
+          }
+          customText="Inventario generado automáticamente"
+        />
       </Page>
     </Document>
   );

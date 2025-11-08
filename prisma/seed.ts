@@ -423,7 +423,7 @@ async function main() {
       address: "Av. Principal 123, Lima, Perú",
       email: "contacto@ambientalpe.com",
       phone: "+51 1 234 5678",
-      logo: "/images/ambientalpe-logo.png",
+      logo: "/logo.png",
     },
   });
 

@@ -48,6 +48,15 @@ const quotationStyles = StyleSheet.create({
     color: colors.info,
     marginBottom: 4,
   },
+  bankGroup: {
+    marginTop: 6,
+  },
+  bankSubtitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 2,
+  },
   bankInfo: {
     fontSize: 7,
     color: colors.grayDark,
@@ -89,12 +98,20 @@ interface QuotationPDFProps {
       email: string;
       phone: string;
       logo?: string | null;
-      bankAccount?: {
-        bankName: string;
-        accountNumber: string;
-        accountType: string;
-        currency: string;
-      } | null;
+      bankAccounts?: {
+        defaultAccount: {
+          bankName: string;
+          accountNumber: string;
+          accountType: string;
+          currency: string;
+        } | null;
+        detractionAccount: {
+          bankName: string;
+          accountNumber: string;
+          accountType: string;
+          currency: string;
+        } | null;
+      };
     };
   };
 }
@@ -244,21 +261,46 @@ export const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotation }) => {
         </View>
 
         {/* Bank Account Information */}
-        {quotation.company?.bankAccount && (
+        {(quotation.company?.bankAccounts?.defaultAccount ||
+          quotation.company?.bankAccounts?.detractionAccount) && (
           <View style={quotationStyles.bankSection}>
             <Text style={quotationStyles.bankTitle}>DATOS BANCARIOS PARA PAGO</Text>
-            <Text style={quotationStyles.bankInfo}>
-              <Text style={commonStyles.textBold}>Banco: </Text>
-              {quotation.company.bankAccount.bankName}
-            </Text>
-            <Text style={quotationStyles.bankInfo}>
-              <Text style={commonStyles.textBold}>Número de Cuenta: </Text>
-              {quotation.company.bankAccount.accountNumber}
-            </Text>
-            <Text style={quotationStyles.bankInfo}>
-              <Text style={commonStyles.textBold}>Tipo: </Text>
-              {quotation.company.bankAccount.accountType} - {quotation.company.bankAccount.currency}
-            </Text>
+            {quotation.company.bankAccounts?.defaultAccount && (
+              <View style={quotationStyles.bankGroup}>
+                <Text style={quotationStyles.bankSubtitle}>Cuenta Principal</Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Banco: </Text>
+                  {quotation.company.bankAccounts.defaultAccount.bankName}
+                </Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Número de Cuenta: </Text>
+                  {quotation.company.bankAccounts.defaultAccount.accountNumber}
+                </Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Tipo: </Text>
+                  {quotation.company.bankAccounts.defaultAccount.accountType} -{" "}
+                  {quotation.company.bankAccounts.defaultAccount.currency}
+                </Text>
+              </View>
+            )}
+            {quotation.company.bankAccounts?.detractionAccount && (
+              <View style={quotationStyles.bankGroup}>
+                <Text style={quotationStyles.bankSubtitle}>Cuenta de Detracción</Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Banco: </Text>
+                  {quotation.company.bankAccounts.detractionAccount.bankName}
+                </Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Número de Cuenta: </Text>
+                  {quotation.company.bankAccounts.detractionAccount.accountNumber}
+                </Text>
+                <Text style={quotationStyles.bankInfo}>
+                  <Text style={commonStyles.textBold}>Tipo: </Text>
+                  {quotation.company.bankAccounts.detractionAccount.accountType} -{" "}
+                  {quotation.company.bankAccounts.detractionAccount.currency}
+                </Text>
+              </View>
+            )}
           </View>
         )}
 

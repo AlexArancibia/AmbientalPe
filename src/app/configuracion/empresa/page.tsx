@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,13 +58,16 @@ export default function ConfiguracionEmpresaPage() {
     logo: "",
   });
 
-  const [bankFormData, setBankFormData] = useState({
+  const createInitialBankFormData = () => ({
     bankName: "",
     accountNumber: "",
     accountType: "CORRIENTE",
     currency: "PEN",
     isDefault: false,
+    isDetraction: false,
   });
+
+  const [bankFormData, setBankFormData] = useState(createInitialBankFormData());
 
   useEffect(() => {
     if (company) {
@@ -78,6 +81,16 @@ export default function ConfiguracionEmpresaPage() {
       });
     }
   }, [company]);
+
+  const accountTypeLabels = useMemo(
+    () => ({
+      CORRIENTE: "Corriente",
+      AHORROS: "Ahorros",
+      CCI: "CCI",
+      DETRACCION: "Detracción",
+    }),
+    []
+  );
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -124,13 +137,7 @@ export default function ConfiguracionEmpresaPage() {
       refetch();
       setBankDialogOpen(false);
       setEditingBankAccount(null);
-      setBankFormData({
-        bankName: "",
-        accountNumber: "",
-        accountType: "CORRIENTE",
-        currency: "PEN",
-        isDefault: false,
-      });
+      setBankFormData(createInitialBankFormData());
     } catch (error: any) {
       toast.error(error.message || "Error al guardar la cuenta bancaria");
     } finally {
@@ -159,16 +166,11 @@ export default function ConfiguracionEmpresaPage() {
         accountType: account.accountType,
         currency: account.currency,
         isDefault: account.isDefault,
+        isDetraction: account.isDetraction ?? false,
       });
     } else {
       setEditingBankAccount(null);
-      setBankFormData({
-        bankName: "",
-        accountNumber: "",
-        accountType: "CORRIENTE",
-        currency: "PEN",
-        isDefault: false,
-      });
+      setBankFormData(createInitialBankFormData());
     }
     setBankDialogOpen(true);
   };
@@ -406,6 +408,7 @@ export default function ConfiguracionEmpresaPage() {
                           onValueChange={(value) =>
                             setBankFormData({ ...bankFormData, accountType: value })
                           }
+                          disabled={bankFormData.isDetraction}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -414,6 +417,7 @@ export default function ConfiguracionEmpresaPage() {
                             <SelectItem value="CORRIENTE">Corriente</SelectItem>
                             <SelectItem value="AHORROS">Ahorros</SelectItem>
                             <SelectItem value="CCI">CCI</SelectItem>
+                            <SelectItem value="DETRACCION">Detracción</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -436,19 +440,44 @@ export default function ConfiguracionEmpresaPage() {
                         </Select>
                       </div>
 
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="isDefault"
-                          checked={bankFormData.isDefault}
-                          onChange={(e) =>
-                            setBankFormData({ ...bankFormData, isDefault: e.target.checked })
-                          }
-                          className="rounded border-gray-300"
-                        />
-                        <Label htmlFor="isDefault" className="font-normal">
-                          Cuenta por defecto
-                        </Label>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="isDefault"
+                            checked={bankFormData.isDefault}
+                            onChange={(e) =>
+                              setBankFormData({ ...bankFormData, isDefault: e.target.checked })
+                            }
+                            className="rounded border-gray-300"
+                          />
+                          <Label htmlFor="isDefault" className="font-normal">
+                            Cuenta por defecto
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="isDetraction"
+                            checked={bankFormData.isDetraction}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setBankFormData((prev) => ({
+                                ...prev,
+                                isDetraction: checked,
+                                accountType: checked
+                                  ? "DETRACCION"
+                                  : prev.accountType === "DETRACCION"
+                                    ? "CORRIENTE"
+                                    : prev.accountType,
+                              }));
+                            }}
+                            className="rounded border-gray-300"
+                          />
+                          <Label htmlFor="isDetraction" className="font-normal">
+                            Cuenta de detracción
+                          </Label>
+                        </div>
                       </div>
                     </div>
                     <DialogFooter>
@@ -491,17 +520,28 @@ export default function ConfiguracionEmpresaPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {company.bankAccounts.map((account: any) => (
+                    {company.bankAccounts.map((account: any) => {
+                      const accountTypeKey = account.accountType as keyof typeof accountTypeLabels;
+                      const accountTypeLabel =
+                        accountTypeLabels[accountTypeKey] ?? account.accountType;
+
+                      return (
                       <TableRow key={account.id}>
                         <TableCell className="font-medium">{account.bankName}</TableCell>
                         <TableCell>{account.accountNumber}</TableCell>
-                        <TableCell>{account.accountType}</TableCell>
+                          <TableCell>{accountTypeLabel}</TableCell>
                         <TableCell>{account.currency}</TableCell>
-                        <TableCell>
+                        <TableCell className="space-y-1">
                           {account.isDefault && (
                             <Badge variant="default">
                               <Check className="h-3 w-3 mr-1" />
                               Por Defecto
+                            </Badge>
+                          )}
+                          {account.isDetraction && (
+                            <Badge variant="outline">
+                              <Check className="h-3 w-3 mr-1" />
+                              Detracción
                             </Badge>
                           )}
                         </TableCell>
@@ -522,7 +562,8 @@ export default function ConfiguracionEmpresaPage() {
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               ) : (

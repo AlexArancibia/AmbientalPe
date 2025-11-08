@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
     const totalServiceAmount = serviceOrders.reduce((sum, o) => sum + o.total, 0);
     const totalPurchaseAmount = purchaseOrders.reduce((sum, o) => sum + o.total, 0);
 
+    const company = await prisma.company.findFirst();
+
     // Prepare data for PDF
     const pdfData = {
       serviceOrders: serviceOrders.map((o) => ({
@@ -112,6 +114,16 @@ export async function GET(request: NextRequest) {
         totalServiceAmount,
         totalPurchaseAmount,
       },
+      company: company
+        ? {
+            name: company.name,
+            ruc: company.ruc,
+            address: company.address,
+            email: company.email,
+            phone: company.phone,
+            logo: company.logo,
+          }
+        : undefined,
     };
 
     // Generate PDF stream

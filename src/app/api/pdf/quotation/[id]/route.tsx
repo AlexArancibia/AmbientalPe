@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { renderToStream } from "@react-pdf/renderer";
 import { QuotationPDF } from "@/components/pdf/QuotationPDF";
 import { prisma } from "@/lib/db";
@@ -14,7 +15,7 @@ interface QuotationItem {
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -24,8 +25,12 @@ export async function GET(
     const company = await prisma.company.findFirst({
       include: {
         bankAccounts: {
-          where: { isDefault: true },
-          take: 1,
+          where: {
+            OR: [
+              { isDefault: true },
+              { isDetraction: true },
+            ],
+          },
         },
       },
     });
@@ -97,7 +102,12 @@ export async function GET(
         email: company.email,
         phone: company.phone,
         logo: company.logo,
-        bankAccount: company.bankAccounts[0] || null,
+        bankAccounts: {
+          defaultAccount:
+            company.bankAccounts.find((account) => account.isDefault) ?? null,
+          detractionAccount:
+            company.bankAccounts.find((account) => account.isDetraction) ?? null,
+        },
       } : undefined,
     };
 

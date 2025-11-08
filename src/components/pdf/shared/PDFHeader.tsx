@@ -19,24 +19,37 @@ interface PDFHeaderProps {
   showCompanyInfo?: boolean;
 }
 
-export const PDFHeader: React.FC<PDFHeaderProps> = ({ 
-  company, 
-  documentTitle, 
+const resolveLogoSource = (logo?: string | null) => {
+  if (!logo || logo.trim() === '') {
+    return `${process.cwd()}/public/logo.png`;
+  }
+
+  if (logo.startsWith('http') || logo.startsWith('data:')) {
+    return logo;
+  }
+
+  if (logo.startsWith('/')) {
+    return `${process.cwd()}/public${logo}`;
+  }
+
+  return `${process.cwd()}/public/${logo}`;
+};
+
+export const PDFHeader: React.FC<PDFHeaderProps> = ({
+  company,
+  documentTitle,
   documentNumber,
   documentDate,
-  showCompanyInfo = true 
+  showCompanyInfo = true,
 }) => {
-  const logoPath = company?.logo || '/logo.png';
+  const logoPath = resolveLogoSource(company?.logo);
 
   return (
     <View style={commonStyles.header}>
       {/* Left side - Company info */}
       <View style={commonStyles.headerLeft}>
         <View style={commonStyles.logoContainer}>
-          <Image
-            src={logoPath}
-            style={commonStyles.logo}
-          />
+          <Image src={logoPath} style={commonStyles.logo} />
         </View>
         {showCompanyInfo && company && (
           <View>

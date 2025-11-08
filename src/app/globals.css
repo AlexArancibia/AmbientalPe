@@ -63,6 +63,14 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+}
+
 /* Custom animations and utilities */
 @layer components {
   .animate-blob {

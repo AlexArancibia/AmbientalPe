@@ -1,191 +1,41 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { PDFHeader } from './shared/PDFHeader';
+import { PDFFooter } from './shared/PDFFooter';
+import { commonStyles, formatUtils } from './shared/pdf-styles';
 
-// Estilos para el PDF
 const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontSize: 9,
-    fontFamily: 'Helvetica',
-  },
-  header: {
+  infoGrid: {
+    display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderBottom: '2 solid #1e3a8a',
-    paddingBottom: 12,
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  logoContainer: {
-    width: 100,
-    height: 40,
-    backgroundColor: '#1e3a8a',
-    padding: 6,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: 3,
-  },
-  subtitle: {
-    fontSize: 11,
-    color: '#64748b',
-  },
-  section: {
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: 8,
-    borderBottom: '1 solid #e2e8f0',
-    paddingBottom: 4,
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  label: {
-    fontWeight: 'bold',
-    width: '40%',
-    color: '#475569',
-  },
-  value: {
-    width: '60%',
-    color: '#1e293b',
-  },
-  table: {
-    width: '100%',
-    marginTop: 8,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
-    padding: 6,
-    fontWeight: 'bold',
-    fontSize: 8,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 8,
-  },
-  tableRowAlt: {
-    flexDirection: 'row',
-    backgroundColor: '#f8fafc',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 8,
-  },
-  col1: { width: '12%' },
-  col2: { width: '35%' },
-  col3: { width: '23%' },
-  col4: { width: '15%' },
-  col5: { width: '15%', textAlign: 'right' },
-  totalsSection: {
-    marginTop: 15,
-    alignItems: 'flex-end',
-  },
-  totalsBox: {
-    width: '40%',
-    backgroundColor: '#f8fafc',
-    padding: 12,
-    borderRadius: 4,
-    border: '1 solid #e2e8f0',
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  infoBox: {
+    width: '48%',
     marginBottom: 6,
-    fontSize: 9,
   },
-  totalLabel: {
-    fontWeight: 'bold',
-    color: '#475569',
-  },
-  totalValue: {
-    color: '#1e293b',
-  },
-  grandTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 6,
-    paddingTop: 6,
-    borderTop: '2 solid #1e3a8a',
-    fontSize: 11,
-  },
-  grandTotalLabel: {
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-  },
-  grandTotalValue: {
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 25,
-    left: 30,
-    right: 30,
-    textAlign: 'center',
-    color: '#94a3b8',
-    fontSize: 7,
-    borderTop: '1 solid #e2e8f0',
-    paddingTop: 8,
-  },
-  notesSection: {
-    marginTop: 15,
-    padding: 10,
-    backgroundColor: '#fef3c7',
-    borderRadius: 4,
-    border: '1 solid #fbbf24',
-  },
-  notesTitle: {
-    fontWeight: 'bold',
-    color: '#92400e',
-    marginBottom: 4,
-  },
-  notesText: {
-    color: '#78350f',
-    fontSize: 8,
-    lineHeight: 1.4,
-  },
-  statusBadge: {
-    padding: 4,
-    borderRadius: 3,
-    fontSize: 8,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-  statusPending: {
-    backgroundColor: '#fef3c7',
-    color: '#92400e',
-  },
-  statusInProgress: {
-    backgroundColor: '#dbeafe',
-    color: '#1e3a8a',
-  },
-  statusCompleted: {
-    backgroundColor: '#dcfce7',
-    color: '#166534',
+  tableColCode: { width: '12%' },
+  tableColDescription: { width: '34%' },
+  tableColName: { width: '22%' },
+  tableColQuantity: { width: '12%', textAlign: 'center' },
+  tableColPrice: { width: '10%', textAlign: 'right' },
+  tableColTotal: { width: '10%', textAlign: 'right' },
+  badgeContainer: {
+    alignSelf: 'flex-start',
+    marginTop: -10,
+    marginBottom: 10,
   },
 });
+
+interface CompanySummary {
+  name: string;
+  ruc: string;
+  address: string;
+  email: string;
+  phone: string;
+  logo?: string | null;
+}
 
 interface PurchaseOrderPDFProps {
   purchaseOrder: {
@@ -218,200 +68,181 @@ interface PurchaseOrderPDFProps {
       unitPrice: number;
     }>;
   };
+  company?: CompanySummary;
 }
 
-export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrder }) => {
-  const currencySymbol = purchaseOrder.currency === 'PEN' ? 'S/' : '$';
+const statusStyles: Record<
+  string,
+  { label: string; style: object }
+> = {
+  pending: { label: 'PENDIENTE', style: commonStyles.badgePending },
+  in_progress: { label: 'EN PROGRESO', style: commonStyles.badgeInProgress },
+  completed: { label: 'COMPLETADA', style: commonStyles.badgeCompleted },
+  cancelled: { label: 'CANCELADA', style: commonStyles.badgeCancelled },
+  approved: { label: 'APROBADA', style: commonStyles.badgeApproved },
+};
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-PE', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
-
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'completado':
-        return styles.statusCompleted;
-      case 'in_progress':
-      case 'en_progreso':
-        return styles.statusInProgress;
-      default:
-        return styles.statusPending;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      pending: 'PENDIENTE',
-      in_progress: 'EN PROGRESO',
-      completed: 'COMPLETADO',
-      cancelled: 'CANCELADO',
-    };
-    return statusMap[status.toLowerCase()] || status.toUpperCase();
+export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrder, company }) => {
+  const statusKey = purchaseOrder.status.toLowerCase();
+  const status = statusStyles[statusKey] ?? {
+    label: purchaseOrder.status.toUpperCase(),
+    style: commonStyles.badgeDraft,
   };
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              src={`${process.cwd()}/public/logo.png`}
-              style={styles.logo}
-            />
+      <Page size="A4" style={commonStyles.page}>
+        <PDFHeader
+          company={company}
+          documentTitle="ORDEN DE COMPRA"
+          documentNumber={purchaseOrder.number}
+          documentDate={formatUtils.date(purchaseOrder.date)}
+        />
+
+        <View style={styles.badgeContainer}>
+          <View style={[commonStyles.badge, status.style]}>
+            <Text>{status.label}</Text>
           </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.title}>ORDEN DE COMPRA</Text>
-            <Text style={styles.subtitle}>Nº {purchaseOrder.number}</Text>
-            <View style={[styles.statusBadge, getStatusStyle(purchaseOrder.status)]}>
-              <Text>{getStatusText(purchaseOrder.status)}</Text>
+        </View>
+
+        <View style={commonStyles.section}>
+          <Text style={commonStyles.sectionTitle}>INFORMACIÓN DEL PROVEEDOR</Text>
+          <View style={styles.infoGrid}>
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Proveedor</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.client.name}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>RUC</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.client.ruc}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Email</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.client.email}</Text>
+            </View>
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Dirección</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.client.address}</Text>
             </View>
           </View>
         </View>
 
-        {/* Información del Proveedor */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>INFORMACIÓN DEL PROVEEDOR</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>Proveedor:</Text>
-            <Text style={styles.value}>{purchaseOrder.client.name}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>RUC:</Text>
-            <Text style={styles.value}>{purchaseOrder.client.ruc}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{purchaseOrder.client.email}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Dirección:</Text>
-            <Text style={styles.value}>{purchaseOrder.client.address}</Text>
-          </View>
-        </View>
-
-        {/* Detalles de la Orden */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DETALLES DE LA ORDEN</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>Fecha de Emisión:</Text>
-            <Text style={styles.value}>{formatDate(purchaseOrder.date)}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Gestor:</Text>
-            <Text style={styles.value}>{purchaseOrder.gestor.name}</Text>
-          </View>
-          {purchaseOrder.attendantName && (
-            <View style={styles.row}>
-              <Text style={styles.label}>Encargado:</Text>
-              <Text style={styles.value}>{purchaseOrder.attendantName}</Text>
+        <View style={commonStyles.section}>
+          <Text style={commonStyles.sectionTitle}>DETALLES DE LA ORDEN</Text>
+          <View style={styles.infoGrid}>
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Fecha de Emisión</Text>
+              <Text style={commonStyles.value}>{formatUtils.dateLong(purchaseOrder.date)}</Text>
             </View>
-          )}
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Gestor</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.gestor.name}</Text>
+            </View>
+            {purchaseOrder.attendantName && (
+              <View style={styles.infoBox}>
+                <Text style={commonStyles.label}>Encargado</Text>
+                <Text style={commonStyles.value}>{purchaseOrder.attendantName}</Text>
+              </View>
+            )}
+            <View style={styles.infoBox}>
+              <Text style={commonStyles.label}>Moneda</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.currency}</Text>
+            </View>
+            {purchaseOrder.paymentTerms && (
+              <View style={styles.infoBox}>
+                <Text style={commonStyles.label}>Términos de Pago</Text>
+                <Text style={commonStyles.value}>{purchaseOrder.paymentTerms}</Text>
+              </View>
+            )}
+          </View>
           {purchaseOrder.description && (
-            <View style={styles.row}>
-              <Text style={styles.label}>Descripción:</Text>
-              <Text style={styles.value}>{purchaseOrder.description}</Text>
-            </View>
-          )}
-          <View style={styles.row}>
-            <Text style={styles.label}>Moneda:</Text>
-            <Text style={styles.value}>{purchaseOrder.currency}</Text>
-          </View>
-          {purchaseOrder.paymentTerms && (
-            <View style={styles.row}>
-              <Text style={styles.label}>Términos de Pago:</Text>
-              <Text style={styles.value}>{purchaseOrder.paymentTerms}</Text>
+            <View style={{ marginTop: 6 }}>
+              <Text style={commonStyles.label}>Descripción</Text>
+              <Text style={commonStyles.value}>{purchaseOrder.description}</Text>
             </View>
           )}
         </View>
 
-        {/* Tabla de Items */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ITEMS DE COMPRA</Text>
-          <View style={styles.table}>
-            {/* Header */}
-            <View style={styles.tableHeader}>
-              <Text style={styles.col1}>Código</Text>
-              <Text style={styles.col2}>Descripción</Text>
-              <Text style={styles.col3}>Nombre</Text>
-              <Text style={styles.col4}>Cantidad</Text>
-              <Text style={styles.col5}>Precio Unit.</Text>
-              <Text style={styles.col5}>Total</Text>
+        <Text style={commonStyles.sectionTitle}>ITEMS DE COMPRA</Text>
+        {purchaseOrder.items.length > 0 ? (
+          <View style={commonStyles.table}>
+            <View style={commonStyles.tableHeader}>
+              <Text style={styles.tableColCode}>Código</Text>
+              <Text style={styles.tableColDescription}>Descripción</Text>
+              <Text style={styles.tableColName}>Nombre</Text>
+              <Text style={styles.tableColQuantity}>Cantidad</Text>
+              <Text style={styles.tableColPrice}>P. Unit.</Text>
+              <Text style={styles.tableColTotal}>Total</Text>
             </View>
-            {/* Rows */}
             {purchaseOrder.items.map((item, index) => {
               const total = item.quantity * item.unitPrice;
               return (
                 <View
-                  key={index}
-                  style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
+                  key={`${item.code}-${index}`}
+                  style={index % 2 === 0 ? commonStyles.tableRow : commonStyles.tableRowAlt}
                 >
-                  <Text style={styles.col1}>{item.code}</Text>
-                  <Text style={styles.col2}>{item.description}</Text>
-                  <Text style={styles.col3}>{item.name}</Text>
-                  <Text style={styles.col4}>{item.quantity}</Text>
-                  <Text style={styles.col5}>
-                    {currencySymbol} {formatCurrency(item.unitPrice)}
+                  <Text style={styles.tableColCode}>{item.code}</Text>
+                  <View style={styles.tableColDescription}>
+                    <Text style={commonStyles.tableCell}>{item.description}</Text>
+                  </View>
+                  <Text style={styles.tableColName}>{item.name}</Text>
+                  <Text style={styles.tableColQuantity}>{item.quantity}</Text>
+                  <Text style={styles.tableColPrice}>
+                    {formatUtils.currency(item.unitPrice, purchaseOrder.currency)}
                   </Text>
-                  <Text style={styles.col5}>
-                    {currencySymbol} {formatCurrency(total)}
+                  <Text style={styles.tableColTotal}>
+                    {formatUtils.currency(total, purchaseOrder.currency)}
                   </Text>
                 </View>
               );
             })}
           </View>
-        </View>
-
-        {/* Totales */}
-        <View style={styles.totalsSection}>
-          <View style={styles.totalsBox}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal:</Text>
-              <Text style={styles.totalValue}>
-                {currencySymbol} {formatCurrency(purchaseOrder.subtotal)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>IGV (18%):</Text>
-              <Text style={styles.totalValue}>
-                {currencySymbol} {formatCurrency(purchaseOrder.igv)}
-              </Text>
-            </View>
-            <View style={styles.grandTotalRow}>
-              <Text style={styles.grandTotalLabel}>TOTAL:</Text>
-              <Text style={styles.grandTotalValue}>
-                {currencySymbol} {formatCurrency(purchaseOrder.total)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Comentarios */}
-        {purchaseOrder.comments && (
-          <View style={styles.notesSection}>
-            <Text style={styles.notesTitle}>COMENTARIOS:</Text>
-            <Text style={styles.notesText}>{purchaseOrder.comments}</Text>
+        ) : (
+          <View style={commonStyles.emptyState}>
+            <Text>No hay items registrados.</Text>
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>
-            Orden de compra generada el {formatDate(new Date().toISOString())}
-          </Text>
-          <Text style={{ marginTop: 3 }}>
-            Para consultas, contáctenos a través de nuestros canales oficiales.
-          </Text>
+        <View style={commonStyles.totalsSection}>
+          <View style={commonStyles.totalRow}>
+            <Text style={commonStyles.totalLabel}>Subtotal</Text>
+            <Text style={commonStyles.totalValue}>
+              {formatUtils.currency(purchaseOrder.subtotal, purchaseOrder.currency)}
+            </Text>
+          </View>
+          <View style={commonStyles.totalRow}>
+            <Text style={commonStyles.totalLabel}>IGV (18%)</Text>
+            <Text style={commonStyles.totalValue}>
+              {formatUtils.currency(purchaseOrder.igv, purchaseOrder.currency)}
+            </Text>
+          </View>
+          <View style={[commonStyles.totalRow, commonStyles.totalFinal]}>
+            <Text style={commonStyles.totalFinalLabel}>TOTAL</Text>
+            <Text style={commonStyles.totalFinalValue}>
+              {formatUtils.currency(purchaseOrder.total, purchaseOrder.currency)}
+            </Text>
+          </View>
         </View>
+
+        {purchaseOrder.comments && (
+          <View style={commonStyles.notesSection}>
+            <Text style={commonStyles.notesTitle}>COMENTARIOS</Text>
+            <Text style={commonStyles.notesText}>{purchaseOrder.comments}</Text>
+          </View>
+        )}
+
+        <PDFFooter
+          company={
+            company
+              ? {
+                  name: company.name,
+                  email: company.email,
+                  phone: company.phone,
+                }
+              : undefined
+          }
+          customText={`Orden de compra generada el ${formatUtils.currentDate()}`}
+        />
       </Page>
     </Document>
   );

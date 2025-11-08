@@ -11,6 +11,16 @@ import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/navigation";
 import { CompanyType } from "@prisma/client";
 
+type ClientFormData = {
+  name: string;
+  ruc: string;
+  email: string;
+  address: string;
+  contactPerson: string;
+  phoneNumber: string;
+  paymentMethod: string;
+};
+
 export default function NewClientPage() {
   const router = useRouter();
 
@@ -22,20 +32,22 @@ export default function NewClientPage() {
   });
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClientFormData>({
     name: "",
     ruc: "",
     email: "",
     address: "",
     contactPerson: "",
-    creditLine: 0,
+    phoneNumber: "",
     paymentMethod: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { phoneNumber, ...rest } = formData;
     await createMutation.mutateAsync({
-      ...formData,
+      ...rest,
+      phoneNumber: phoneNumber.trim() !== "" ? phoneNumber.trim() : undefined,
       type: CompanyType.CLIENT,
     });
   };
@@ -140,17 +152,16 @@ export default function NewClientPage() {
                 />
               </div>
 
-              {/* Credit Line */}
+              {/* Phone Number */}
               <div className="space-y-2">
-                <Label htmlFor="creditLine">Línea de Crédito (S/)</Label>
+                <Label htmlFor="phoneNumber">Teléfono</Label>
                 <Input
-                  id="creditLine"
-                  type="number"
-                  value={formData.creditLine}
-                  onChange={(e) => setFormData({ ...formData, creditLine: parseFloat(e.target.value) || 0 })}
-                  min="0"
-                  step="0.01"
-                  placeholder="Ej: 10000.00"
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phoneNumber: e.target.value })
+                  }
+                  placeholder="Ej: +51 999 888 777"
                 />
               </div>
 

@@ -14,26 +14,25 @@ interface PDFFooterProps {
   showPageNumber?: boolean;
 }
 
-export const PDFFooter: React.FC<PDFFooterProps> = ({ 
-  company, 
+export const PDFFooter: React.FC<PDFFooterProps> = ({
+  company,
   customText,
-  showPageNumber = true 
+  showPageNumber = true,
 }) => {
   return (
     <>
       {/* Footer */}
       <View style={commonStyles.footer}>
-        <Text style={commonStyles.footerText}>
-          {customText || 'Documento generado automáticamente'}
-        </Text>
+        {customText && (
+          <Text style={commonStyles.footerText}>
+            {customText}
+          </Text>
+        )}
         {company && (
           <Text style={commonStyles.footerCompanyInfo}>
             {company.name} | {company.email} | {company.phone}
           </Text>
         )}
-        <Text style={[commonStyles.footerText, { marginTop: 3 }]}>
-          Para más información, contáctenos a través de nuestros canales oficiales.
-        </Text>
       </View>
 
       {/* Page Number */}

@@ -81,7 +81,7 @@ export const clientRouter = router({
         type: z.nativeEnum(CompanyType),
         email: z.string().email("Invalid email"),
         contactPerson: z.string().optional(),
-        creditLine: z.number().min(0).optional(),
+        phoneNumber: z.string().optional(),
         paymentMethod: z.string().optional(),
         startDate: z.date().optional(),
       })
@@ -117,7 +117,7 @@ export const clientRouter = router({
         type: z.nativeEnum(CompanyType).optional(),
         email: z.string().email("Invalid email").optional(),
         contactPerson: z.string().optional(),
-        creditLine: z.number().min(0).optional(),
+        phoneNumber: z.string().optional(),
         paymentMethod: z.string().optional(),
         startDate: z.date().optional(),
       })

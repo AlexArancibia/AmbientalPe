@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -11,9 +8,369 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ================================
-// ENUMS
-// ================================
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  emailVerified  Boolean         @default(false)
+  image          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  phone          String?
+  language       Language        @default(ES)
+  position       String?
+  department     String?
+  role           String?
+  deletedAt      DateTime?
+  accounts       Account[]
+  sessions       Session[]
+  purchaseOrders PurchaseOrder[] @relation("PurchaseOrderGestor")
+  serviceOrders  ServiceOrder[]  @relation("Gestor")
+  userRoles      UserRole[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+}
+
+model Role {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  displayName     String
+  description     String?
+  isActive        Boolean          @default(true)
+  isSystem        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              String             @id @default(uuid())
+  action          PermissionAction
+  resource        PermissionResource
+  description     String?
+  isActive        Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  rolePermissions RolePermission[]
+
+  @@unique([action, resource])
+  @@map("permissions")
+}
+
+model UserRole {
+  id         String    @id @default(uuid())
+  userId     String
+  roleId     String
+  assignedAt DateTime  @default(now())
+  assignedBy String?
+  expiresAt  DateTime?
+  role       Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([expiresAt])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model Client {
+  id             String          @id @default(cuid())
+  name           String
+  ruc            String          @unique
+  address        String
+  type           CompanyType
+  email          String
+  contactPerson  String?
+  phoneNumber    String?
+  creditLine     Float?
+  paymentMethod  String?
+  startDate      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  purchaseOrders PurchaseOrder[]
+  quotations     Quotation[]
+  serviceOrders  ServiceOrder[]
+
+  @@map("clients")
+}
+
+model Equipment {
+  id              String    @id @default(cuid())
+  name            String
+  type            String
+  code            String    @unique
+  description     String
+  components      Json?
+  status          String
+  isCalibrated    Boolean?
+  calibrationDate DateTime?
+  serialNumber    String?
+  observations    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  @@map("equipment")
+}
+
+model Quotation {
+  id                   String          @id @default(cuid())
+  number               String          @unique
+  date                 DateTime
+  clientId             String
+  currency             String
+  equipmentReleaseDate DateTime
+  subtotal             Float
+  igv                  Float
+  total                Float
+  validityDays         Int
+  status               String
+  notes                String?
+  considerDays         Int?
+  returnDate           DateTime?
+  monitoringLocation   String?
+  creditLine           Float?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  deletedAt            DateTime?
+  items                QuotationItem[]
+  client               Client          @relation(fields: [clientId], references: [id])
+
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  description String
+  code        String
+  quantity    Int
+  days        Int
+  unitPrice   Float
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@index([quotationId])
+  @@map("quotation_items")
+}
+
+model QuotationItemTemplate {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  description String
+  quantity    Int       @default(1)
+  days        Int       @default(1)
+  unitPrice   Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@map("quotation_item_templates")
+}
+
+model ServiceOrder {
+  id            String             @id @default(cuid())
+  number        String             @unique
+  date          DateTime
+  clientId      String
+  description   String?
+  currency      String
+  paymentTerms  String?
+  gestorId      String
+  attendantName String?
+  subtotal      Float
+  igv           Float
+  total         Float
+  comments      String?
+  status        String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+  items         ServiceOrderItem[]
+  client        Client             @relation(fields: [clientId], references: [id])
+  gestor        User               @relation("Gestor", fields: [gestorId], references: [id])
+
+  @@map("service_orders")
+}
+
+model ServiceOrderItem {
+  id             String       @id @default(cuid())
+  serviceOrderId String
+  code           String
+  description    String
+  quantity       Int
+  unitPrice      Float
+  days           Int?
+  name           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  @@index([serviceOrderId])
+  @@map("service_order_items")
+}
+
+model ServiceOrderItemTemplate {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  description String
+  quantity    Int       @default(1)
+  days        Int?      @default(1)
+  unitPrice   Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@map("service_order_item_templates")
+}
+
+model PurchaseOrder {
+  id            String              @id @default(cuid())
+  number        String              @unique
+  date          DateTime
+  clientId      String
+  description   String?
+  currency      String
+  paymentTerms  String?
+  gestorId      String
+  attendantName String?
+  subtotal      Float
+  igv           Float
+  total         Float
+  comments      String?
+  status        String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deletedAt     DateTime?
+  items         PurchaseOrderItem[]
+  client        Client              @relation(fields: [clientId], references: [id])
+  gestor        User                @relation("PurchaseOrderGestor", fields: [gestorId], references: [id])
+
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  code            String
+  purchaseOrderId String
+  description     String
+  quantity        Int
+  unitPrice       Float
+  name            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
+}
+
+model PurchaseOrderItemTemplate {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  description String
+  quantity    Int       @default(1)
+  unitPrice   Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@map("purchase_order_item_templates")
+}
+
+model Company {
+  id           String        @id @default(cuid())
+  name         String
+  ruc          String        @unique
+  address      String
+  email        String
+  phone        String
+  logo         String?
+  bankAccounts BankAccount[]
+
+  @@map("companies")
+}
+
+model BankAccount {
+  id            String  @id @default(cuid())
+  companyId     String
+  bankName      String
+  accountNumber String
+  accountType   String
+  currency      String
+  isDefault     Boolean @default(false)
+  isDetraction  Boolean @default(false)
+  company       Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("bank_accounts")
+}
 
 enum Language {
   ES
@@ -52,409 +409,4 @@ enum PermissionResource {
   COMPANY
   DASHBOARD
   ADMIN
-}
-
-// ================================
-// AUTH MODELS (Better Auth)
-// ================================
-
-model User {
-  // Core Better Auth fields (required)
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Additional application fields
-  phone      String?
-  language   Language  @default(ES)
-  position   String?
-  department String?
-  role       String?   // Campo de texto libre para el rol del usuario en la empresa
-  deletedAt  DateTime?
-
-  // Relations
-  sessions           Session[]
-  accounts           Account[]
-  userRoles          UserRole[]
-  serviceOrders      ServiceOrder[] @relation("Gestor")
-  purchaseOrders     PurchaseOrder[] @relation("PurchaseOrderGestor")
-}
-
-model Session {
-  // Core Better Auth fields (required)
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Account {
-  // Core Better Auth fields (required)
-  id                    String    @id @default(cuid())
-  userId                String
-  accountId             String
-  providerId            String
-  accessToken           String?
-  refreshToken          String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  idToken               String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  // Relations
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([providerId, accountId])
-}
-
-model Verification {
-  // Core Better Auth fields (required)
-  id         String   @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([identifier, value])
-}
-
-// ================================
-// RBAC SYSTEM
-// ================================
-
-model Role {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  displayName String
-  description String?
-  isActive    Boolean   @default(true)
-  isSystem    Boolean   @default(false) // System roles cannot be deleted
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // Relations
-  userRoles        UserRole[]
-  rolePermissions  RolePermission[]
-
-  @@map("roles")
-}
-
-model Permission {
-  id          String            @id @default(uuid())
-  action      PermissionAction
-  resource    PermissionResource
-  description String?
-  isActive    Boolean           @default(true)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  // Relations
-  rolePermissions RolePermission[]
-
-  @@unique([action, resource])
-  @@map("permissions")
-}
-
-model UserRole {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  roleId    String
-  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  assignedAt DateTime @default(now())
-  assignedBy String? // ID of the user who assigned this role
-  expiresAt  DateTime? // Optional expiration date for temporary roles
-
-  @@unique([userId, roleId])
-  @@index([userId])
-  @@index([roleId])
-  @@index([expiresAt])
-  @@map("user_roles")
-}
-
-model RolePermission {
-  id           String     @id @default(uuid())
-  roleId       String
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permissionId String
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now())
-
-  @@unique([roleId, permissionId])
-  @@index([roleId])
-  @@index([permissionId])
-  @@map("role_permissions")
-}
-
-// ================================
-// BUSINESS MODELS - AMBIENTALPE
-// ================================
-
-model Client {
-  id                 String      @id @default(cuid())
-  name               String
-  ruc                String      @unique
-  address            String
-  type               CompanyType
-  email              String
-  contactPerson      String?
-  creditLine         Float?
-  paymentMethod      String?
-  startDate          DateTime?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  deletedAt          DateTime?
-
-  // Relations
-  quotations     Quotation[]
-  serviceOrders  ServiceOrder[]
-  purchaseOrders PurchaseOrder[]
-
-  @@map("clients")
-}
-
-model Equipment {
-  id             String    @id @default(cuid())
-  name           String
-  type           String
-  code           String    @unique
-  description    String
-  components     Json?
-  status         String
-  isCalibrated   Boolean?
-  calibrationDate DateTime?
-  serialNumber   String?
-  observations   String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  @@map("equipment")
-}
-
-model Quotation {
-  id                   String    @id @default(cuid())
-  number               String    @unique
-  date                 DateTime
-  clientId             String
-  currency             String
-  equipmentReleaseDate DateTime
-  subtotal             Float
-  igv                  Float
-  total                Float
-  validityDays         Int
-  status               String
-  notes                String?
-  considerDays         Int?
-  returnDate           DateTime?
-  monitoringLocation   String?
-  creditLine           Float?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  deletedAt            DateTime?
-
-  // Relations
-  client Client        @relation(fields: [clientId], references: [id])
-  items  QuotationItem[]
-
-  @@map("quotations")
-}
-
-model QuotationItem {
-  id          String     @id @default(cuid())
-  quotationId String
-  quotation   Quotation  @relation(fields: [quotationId], references: [id], onDelete: Cascade)
-  description String
-  code        String
-  quantity    Int
-  days        Int
-  unitPrice   Float
-  name        String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  deletedAt   DateTime?
-
-  @@index([quotationId])
-  @@map("quotation_items")
-}
-
-// Template for reusable quotation items
-model QuotationItemTemplate {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  name        String
-  description String
-  quantity    Int       @default(1)
-  days        Int       @default(1)
-  unitPrice   Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  @@map("quotation_item_templates")
-}
-
-model ServiceOrder {
-  id                  String    @id @default(cuid())
-  number              String    @unique
-  date                DateTime
-  clientId            String
-  description         String?
-  currency            String
-  paymentTerms        String?
-  gestorId            String
-  attendantName       String?
-  subtotal            Float
-  igv                 Float
-  total               Float
-  comments            String?
-  status              String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  deletedAt           DateTime?
-
-  // Relations
-  client Client              @relation(fields: [clientId], references: [id])
-  gestor User                @relation("Gestor", fields: [gestorId], references: [id])
-  items  ServiceOrderItem[]
-
-  @@map("service_orders")
-}
-
-model ServiceOrderItem {
-  id             String        @id @default(cuid())
-  serviceOrderId String
-  serviceOrder   ServiceOrder  @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
-  code           String
-  description    String
-  quantity       Int
-  unitPrice      Float
-  days           Int?
-  name           String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  deletedAt      DateTime?
-
-  @@index([serviceOrderId])
-  @@map("service_order_items")
-}
-
-// Template for reusable service order items
-model ServiceOrderItemTemplate {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  name        String
-  description String
-  quantity    Int       @default(1)
-  days        Int?      @default(1)
-  unitPrice   Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  @@map("service_order_item_templates")
-}
-
-model PurchaseOrder {
-  id                  String    @id @default(cuid())
-  number              String    @unique
-  date                DateTime
-  clientId            String
-  description         String?
-  currency            String
-  paymentTerms        String?
-  gestorId            String
-  attendantName       String?
-  subtotal            Float
-  igv                 Float
-  total               Float
-  comments            String?
-  status              String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  deletedAt           DateTime?
-
-  // Relations
-  client Client              @relation(fields: [clientId], references: [id])
-  gestor User                @relation("PurchaseOrderGestor", fields: [gestorId], references: [id])
-  items  PurchaseOrderItem[]
-
-  @@map("purchase_orders")
-}
-
-model PurchaseOrderItem {
-  id              String        @id @default(cuid())
-  code            String
-  purchaseOrderId String
-  description     String
-  quantity        Int
-  unitPrice       Float
-  name            String
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
-
-  @@index([purchaseOrderId])
-  @@map("purchase_order_items")
-}
-
-// Template for reusable purchase order items
-model PurchaseOrderItemTemplate {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  name        String
-  description String
-  quantity    Int       @default(1)
-  unitPrice   Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  @@map("purchase_order_item_templates")
-}
-
-model Company {
-  id      String @id @default(cuid())
-  name    String
-  ruc     String @unique
-  address String
-  email   String
-  phone   String
-  logo    String?
-
-  // Relations
-  bankAccounts BankAccount[]
-
-  @@map("companies")
-}
-
-model BankAccount {
-  id           String  @id @default(cuid())
-  companyId    String
-  bankName     String
-  accountNumber String
-  accountType  String
-  currency     String
-  isDefault    Boolean @default(false)
-
-  // Relations
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@map("bank_accounts")
 }

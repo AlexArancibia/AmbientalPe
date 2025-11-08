@@ -162,7 +162,6 @@ export const QuotationListPDF: React.FC<QuotationListPDFProps> = ({
             email: company.email,
             phone: company.phone,
           } : undefined}
-          customText="Reporte generado automáticamente"
         />
       </Page>
     </Document>

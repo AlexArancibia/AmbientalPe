@@ -116,7 +116,6 @@ export const companyRouter = router({
       .query(async ({ ctx, input }) => {
         const bankAccounts = await ctx.db.bankAccount.findMany({
           where: { companyId: input.companyId },
-          orderBy: { isDefault: "desc" },
         });
 
         return bankAccounts;
@@ -132,6 +131,7 @@ export const companyRouter = router({
           accountType: z.string().min(1, "Account type is required"),
           currency: z.string().min(1, "Currency is required"),
           isDefault: z.boolean().default(false),
+          isDetraction: z.boolean().default(false),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -146,8 +146,25 @@ export const companyRouter = router({
           });
         }
 
+        if (input.isDetraction) {
+          await ctx.db.bankAccount.updateMany({
+            where: {
+              companyId: input.companyId,
+              isDetraction: true,
+            },
+            data: { isDetraction: false },
+          });
+        }
+
+        const data = input.isDetraction
+          ? {
+              ...input,
+              accountType: "DETRACCION",
+            }
+          : input;
+
         const bankAccount = await ctx.db.bankAccount.create({
-          data: input,
+          data,
         });
 
         return bankAccount;
@@ -163,6 +180,7 @@ export const companyRouter = router({
           accountType: z.string().min(1, "Account type is required").optional(),
           currency: z.string().min(1, "Currency is required").optional(),
           isDefault: z.boolean().optional(),
+          isDetraction: z.boolean().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -191,9 +209,28 @@ export const companyRouter = router({
           });
         }
 
+        if (data.isDetraction) {
+          await ctx.db.bankAccount.updateMany({
+            where: {
+              companyId: existingAccount.companyId,
+              isDetraction: true,
+              id: { not: id },
+            },
+            data: { isDetraction: false },
+          });
+        }
+
+        const updateData =
+          data.isDetraction === true
+            ? {
+                ...data,
+                accountType: "DETRACCION",
+              }
+            : data;
+
         const updatedAccount = await ctx.db.bankAccount.update({
           where: { id },
-          data,
+          data: updateData,
         });
 
         return updatedAccount;

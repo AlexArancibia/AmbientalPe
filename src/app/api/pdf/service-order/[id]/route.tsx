@@ -59,6 +59,8 @@ export async function GET(
       );
     }
 
+    const company = await prisma.company.findFirst();
+
     // Prepare data for PDF
     const pdfData = {
       number: serviceOrder.number,
@@ -90,6 +92,16 @@ export async function GET(
         days: item.days,
         unitPrice: Number(item.unitPrice),
       })),
+      company: company
+        ? {
+            name: company.name,
+            ruc: company.ruc,
+            address: company.address,
+            email: company.email,
+            phone: company.phone,
+            logo: company.logo,
+          }
+        : undefined,
     };
 
     // Generate PDF stream

@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Plus, Mail, MapPin, Loader2, Edit, Eye, Trash2, FileDown } from "lucide-react";
+import { Users, Search, Plus, Mail, MapPin, Loader2, Edit, Eye, Trash2, FileDown, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
@@ -40,13 +40,23 @@ type Client = {
   email: string;
   address: string;
   contactPerson: string | null;
-  creditLine: number | null;
+  phoneNumber: string | null;
   type: CompanyType;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
   paymentMethod: string | null;
   startDate: string | null;
+};
+
+type ClientFormData = {
+  name: string;
+  ruc: string;
+  email: string;
+  address: string;
+  contactPerson: string;
+  phoneNumber: string;
+  paymentMethod: string;
 };
 
 export default function ClientesPage() {
@@ -59,13 +69,13 @@ export default function ClientesPage() {
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
 
   // Form state for new client
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClientFormData>({
     name: "",
     ruc: "",
     email: "",
     address: "",
     contactPerson: "",
-    creditLine: 0,
+    phoneNumber: "",
     paymentMethod: "",
   });
 
@@ -88,7 +98,7 @@ export default function ClientesPage() {
         email: "",
         address: "",
         contactPerson: "",
-        creditLine: 0,
+        phoneNumber: "",
         paymentMethod: "",
       });
     },
@@ -108,8 +118,10 @@ export default function ClientesPage() {
 
   const handleCreateClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { phoneNumber, ...rest } = formData;
     await createMutation.mutateAsync({
-      ...formData,
+      ...rest,
+      phoneNumber: phoneNumber.trim() !== "" ? phoneNumber.trim() : undefined,
       type: CompanyType.CLIENT,
     });
   };
@@ -157,13 +169,13 @@ export default function ClientesPage() {
       ),
     },
     {
-      header: "Línea de Crédito",
+      header: "Teléfono",
       cell: (client) => (
-        <div className="min-w-[120px] text-right font-medium">
-          {client.creditLine ? `S/ ${client.creditLine.toLocaleString()}` : "-"}
+        <div className="flex items-center space-x-2 min-w-[160px]">
+          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <span>{client.phoneNumber || "-"}</span>
         </div>
       ),
-      className: "text-right",
     },
     {
       header: "Estado",
@@ -209,8 +221,7 @@ export default function ClientesPage() {
       className: "w-[120px]",
     },
   ];
-
-  const totalCreditLine = clientes.reduce((sum, c) => sum + (c.creditLine || 0), 0);
+  const clientsWithPhone = clientes.filter((c) => !!c.phoneNumber).length;
 
   return (
     <div className="bg-background">
@@ -349,15 +360,14 @@ export default function ClientesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="creditLine">Línea de Crédito (S/)</Label>
+                  <Label htmlFor="phoneNumber">Teléfono</Label>
                   <Input
-                    id="creditLine"
-                    type="number"
-                    value={formData.creditLine}
-                    onChange={(e) => setFormData({ ...formData, creditLine: parseFloat(e.target.value) || 0 })}
-                    min="0"
-                    step="0.01"
-                    placeholder="Ej: 10000.00"
+                    id="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phoneNumber: e.target.value })
+                    }
+                    placeholder="Ej: +51 999 888 777"
                   />
                 </div>
 
@@ -411,42 +421,6 @@ export default function ClientesPage() {
               className="pl-10"
             />
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Clientes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data?.total || 0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Línea de Crédito Total
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                S/ {totalCreditLine.toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Clientes Activos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data?.total || 0}</div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Clientes Table */}

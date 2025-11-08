@@ -7,11 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, ArrowLeft, Edit, Save, X, Loader2, Mail, MapPin, User, CreditCard, Calendar, FileCheck, FolderOpen, Phone, Building2 } from "lucide-react";
+import { Users, ArrowLeft, Edit, Save, X, Loader2, Mail, MapPin, Calendar, FileCheck, FolderOpen, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { trpc } from "@/utils/trpc";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { CompanyType } from "@prisma/client";
+
+type ClientFormData = {
+  name: string;
+  ruc: string;
+  email: string;
+  address: string;
+  contactPerson: string;
+  phoneNumber: string;
+  paymentMethod: string;
+};
 
 export default function ClientDetailPage() {
   const router = useRouter();
@@ -53,13 +63,13 @@ export default function ClientDetailPage() {
   });
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClientFormData>({
     name: "",
     ruc: "",
     email: "",
     address: "",
     contactPerson: "",
-    creditLine: 0,
+    phoneNumber: "",
     paymentMethod: "",
   });
 
@@ -71,7 +81,7 @@ export default function ClientDetailPage() {
         email: client.email,
         address: client.address,
         contactPerson: client.contactPerson || "",
-        creditLine: client.creditLine || 0,
+        phoneNumber: client.phoneNumber || "",
         paymentMethod: client.paymentMethod || "",
       });
     }
@@ -79,9 +89,11 @@ export default function ClientDetailPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { phoneNumber, ...rest } = formData;
     await updateMutation.mutateAsync({
       id,
-      ...formData,
+      ...rest,
+      phoneNumber: phoneNumber.trim() !== "" ? phoneNumber.trim() : undefined,
       type: CompanyType.CLIENT,
     });
   };
@@ -94,7 +106,7 @@ export default function ClientDetailPage() {
         email: client.email,
         address: client.address,
         contactPerson: client.contactPerson || "",
-        creditLine: client.creditLine || 0,
+        phoneNumber: client.phoneNumber || "",
         paymentMethod: client.paymentMethod || "",
       });
     }
@@ -235,6 +247,21 @@ export default function ClientDetailPage() {
                       )}
                     </div>
 
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Teléfono</Label>
+                      {isEditMode ? (
+                        <Input
+                          value={formData.phoneNumber}
+                          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        />
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-sm font-medium">{client.phoneNumber || "-"}</p>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="col-span-2 space-y-2">
                       <Label className="text-xs text-muted-foreground">Dirección</Label>
                       {isEditMode ? (
@@ -246,21 +273,6 @@ export default function ClientDetailPage() {
                         />
                       ) : (
                         <p className="text-sm font-medium">{client.address}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Línea de Crédito</Label>
-                      {isEditMode ? (
-                        <Input
-                          type="number"
-                          value={formData.creditLine}
-                          onChange={(e) => setFormData({ ...formData, creditLine: parseFloat(e.target.value) || 0 })}
-                          min="0"
-                          step="0.01"
-                        />
-                      ) : (
-                        <p className="text-sm font-medium">S/ {client.creditLine?.toLocaleString() || "0"}</p>
                       )}
                     </div>
 
@@ -406,10 +418,6 @@ export default function ClientDetailPage() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Órdenes</span>
                     <span className="font-bold">{serviceOrdersData?.total || 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Línea de Crédito</span>
-                    <span className="font-bold">S/ {client.creditLine?.toLocaleString() || "0"}</span>
                   </div>
                 </div>
               </CardContent>

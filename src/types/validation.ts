@@ -344,6 +344,7 @@ export const bankAccountSchema = z.object({
   accountType: requiredStringSchema,
   currency: currencySchema,
   isDefault: z.boolean().default(false),
+  isDetraction: z.boolean().default(false),
 });
 
 // Item Template Schemas (for reusable items)

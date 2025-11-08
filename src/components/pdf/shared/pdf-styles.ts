@@ -50,9 +50,14 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   logoContainer: {
-    width: 80,
-    height: 35,
+    width: 90,
+    height: 40,
     marginBottom: 8,
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logo: {
     width: '100%',

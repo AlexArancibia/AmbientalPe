@@ -1,124 +1,24 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { PDFHeader } from './shared/PDFHeader';
+import { PDFFooter } from './shared/PDFFooter';
+import { commonStyles, formatUtils } from './shared/pdf-styles';
 
-// Estilos para el PDF
 const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontSize: 9,
-    fontFamily: 'Helvetica',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderBottom: '2 solid #1e3a8a',
-    paddingBottom: 12,
-  },
-  logoContainer: {
-    width: 100,
-    height: 40,
-    backgroundColor: '#1e3a8a',
-    padding: 6,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: 3,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: '#64748b',
-  },
-  summarySection: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 4,
-    border: '1 solid #e2e8f0',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 3,
-  },
-  summaryLabel: {
-    fontWeight: 'bold',
-    color: '#475569',
-    fontSize: 9,
-  },
-  summaryValue: {
-    color: '#1e3a8a',
-    fontWeight: 'bold',
-    fontSize: 9,
-  },
-  table: {
-    width: '100%',
-    marginTop: 8,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
-    padding: 6,
-    fontWeight: 'bold',
-    fontSize: 8,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 7,
-  },
-  tableRowAlt: {
-    flexDirection: 'row',
-    backgroundColor: '#f8fafc',
-    borderBottom: '1 solid #e2e8f0',
-    padding: 6,
-    fontSize: 7,
-  },
-  col1: { width: '25%' },
-  col2: { width: '15%' },
-  col3: { width: '20%' },
-  col4: { width: '40%' },
-  footer: {
-    position: 'absolute',
-    bottom: 25,
-    left: 30,
-    right: 30,
-    textAlign: 'center',
-    color: '#94a3b8',
-    fontSize: 7,
-    borderTop: '1 solid #e2e8f0',
-    paddingTop: 8,
-  },
-  pageNumber: {
-    position: 'absolute',
-    bottom: 10,
-    right: 30,
-    fontSize: 7,
-    color: '#94a3b8',
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: 30,
-    color: '#94a3b8',
-    fontSize: 10,
-  },
+  colName: { width: '30%' },
+  colRuc: { width: '15%' },
+  colEmail: { width: '20%' },
+  colAddress: { width: '35%' },
 });
+
+interface CompanySummary {
+  name: string;
+  ruc: string;
+  address: string;
+  email: string;
+  phone: string;
+  logo?: string | null;
+}
 
 interface ClientListPDFProps {
   clients: Array<{
@@ -133,93 +33,80 @@ interface ClientListPDFProps {
     type?: string;
     search?: string;
   };
+  company?: CompanySummary;
 }
 
-export const ClientListPDF: React.FC<ClientListPDFProps> = ({ clients, filters }) => {
-  const formatDate = () => {
-    return new Date().toLocaleDateString('es-PE', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const getTypeLabel = (type: string) => {
-    return type === 'CLIENT' ? 'Cliente' : 'Proveedor';
-  };
-
+export const ClientListPDF: React.FC<ClientListPDFProps> = ({ clients, filters, company }) => {
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              src={`${process.cwd()}/public/logo.png`}
-              style={styles.logo}
-            />
-          </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.title}>LISTA DE CLIENTES</Text>
-            <Text style={styles.subtitle}>Generado: {formatDate()}</Text>
-          </View>
-        </View>
+      <Page size="A4" style={commonStyles.page}>
+        <PDFHeader
+          company={company}
+          documentTitle="LISTA DE CLIENTES"
+          documentDate={formatUtils.currentDate()}
+          showCompanyInfo={false}
+        />
 
-        {/* Summary */}
-        <View style={styles.summarySection}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total de Clientes:</Text>
-            <Text style={styles.summaryValue}>{clients.length}</Text>
+        <View style={commonStyles.summarySection}>
+          <View style={commonStyles.summaryRow}>
+            <Text style={commonStyles.summaryLabel}>Total de Clientes:</Text>
+            <Text style={commonStyles.summaryValue}>{clients.length}</Text>
           </View>
           {filters?.search && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Búsqueda:</Text>
-              <Text style={styles.summaryValue}>{filters.search}</Text>
+            <View style={commonStyles.summaryRow}>
+              <Text style={commonStyles.summaryLabel}>Búsqueda:</Text>
+              <Text style={commonStyles.summaryValue}>{filters.search}</Text>
             </View>
           )}
         </View>
 
-        {/* Table */}
         {clients.length > 0 ? (
-          <View style={styles.table}>
-            {/* Header */}
-            <View style={styles.tableHeader}>
-              <Text style={styles.col1}>Nombre / Razón Social</Text>
-              <Text style={styles.col2}>RUC</Text>
-              <Text style={styles.col3}>Email</Text>
-              <Text style={styles.col4}>Dirección</Text>
-            </View>
-            {/* Rows */}
-            {clients.map((client, index) => (
-              <View
-                key={index}
-                style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
-              >
-                <Text style={styles.col1}>{client.name}</Text>
-                <Text style={styles.col2}>{client.ruc}</Text>
-                <Text style={styles.col3}>{client.email}</Text>
-                <Text style={styles.col4}>{client.address}</Text>
+          <>
+            <Text style={commonStyles.sectionTitle}>DETALLE DE CLIENTES</Text>
+            <View style={commonStyles.table}>
+              <View style={commonStyles.tableHeader}>
+                <Text style={styles.colName}>Nombre / Razón Social</Text>
+                <Text style={styles.colRuc}>RUC</Text>
+                <Text style={styles.colEmail}>Email</Text>
+                <Text style={styles.colAddress}>Dirección</Text>
               </View>
-            ))}
-          </View>
+              {clients.map((client, index) => (
+                <View
+                  key={`${client.ruc}-${index}`}
+                  style={index % 2 === 0 ? commonStyles.tableRow : commonStyles.tableRowAlt}
+                >
+                  <View style={styles.colName}>
+                    <Text style={commonStyles.tableCell}>{client.name}</Text>
+                    {client.contactPerson && (
+                      <Text style={[commonStyles.tableCell, commonStyles.textSmall, commonStyles.textMuted]}>
+                        Contacto: {client.contactPerson}
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={styles.colRuc}>{client.ruc}</Text>
+                  <Text style={styles.colEmail}>{client.email}</Text>
+                  <Text style={styles.colAddress}>{client.address}</Text>
+                </View>
+              ))}
+            </View>
+          </>
         ) : (
-          <View style={styles.emptyState}>
+          <View style={commonStyles.emptyState}>
             <Text>No hay clientes registrados para mostrar.</Text>
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Reporte generado automáticamente - AmbientalPE</Text>
-          <Text style={{ marginTop: 3 }}>
-            Para más información, contáctenos a través de nuestros canales oficiales.
-          </Text>
-        </View>
-
-        {/* Page Number */}
-        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
-          `Página ${pageNumber} de ${totalPages}`
-        )} fixed />
+        <PDFFooter
+          company={
+            company
+              ? {
+                  name: company.name,
+                  email: company.email,
+                  phone: company.phone,
+                }
+              : undefined
+          }
+        />
       </Page>
     </Document>
   );

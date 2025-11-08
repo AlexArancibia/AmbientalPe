@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image } from '@react-pdf/renderer';
-import { commonStyles, colors } from './pdf-styles';
+import { commonStyles as defaultStyles, type PdfTheme } from './pdf-styles';
 
 interface CompanyInfo {
   name: string;
@@ -17,6 +17,7 @@ interface PDFHeaderProps {
   documentNumber?: string;
   documentDate?: string;
   showCompanyInfo?: boolean;
+  theme?: PdfTheme;
 }
 
 const resolveLogoSource = (logo?: string | null) => {
@@ -41,35 +42,37 @@ export const PDFHeader: React.FC<PDFHeaderProps> = ({
   documentNumber,
   documentDate,
   showCompanyInfo = true,
+  theme,
 }) => {
   const logoPath = resolveLogoSource(company?.logo);
+  const styles = theme?.styles ?? defaultStyles;
 
   return (
-    <View style={commonStyles.header}>
+    <View style={styles.header}>
       {/* Left side - Company info */}
-      <View style={commonStyles.headerLeft}>
-        <View style={commonStyles.logoContainer}>
-          <Image src={logoPath} style={commonStyles.logo} />
+      <View style={styles.headerLeft}>
+        <View style={styles.logoContainer}>
+          <Image src={logoPath} style={styles.logo} />
         </View>
         {showCompanyInfo && company && (
           <View>
-            <Text style={commonStyles.companyName}>{company.name}</Text>
-            <Text style={commonStyles.companyInfo}>RUC: {company.ruc}</Text>
-            <Text style={commonStyles.companyInfo}>{company.address}</Text>
-            <Text style={commonStyles.companyInfo}>{company.email}</Text>
-            <Text style={commonStyles.companyInfo}>{company.phone}</Text>
+            <Text style={styles.companyName}>{company.name}</Text>
+            <Text style={styles.companyInfo}>RUC: {company.ruc}</Text>
+            <Text style={styles.companyInfo}>{company.address}</Text>
+            <Text style={styles.companyInfo}>{company.email}</Text>
+            <Text style={styles.companyInfo}>{company.phone}</Text>
           </View>
         )}
       </View>
 
       {/* Right side - Document info */}
-      <View style={commonStyles.headerRight}>
-        <Text style={commonStyles.title}>{documentTitle}</Text>
+      <View style={styles.headerRight}>
+        <Text style={styles.title}>{documentTitle}</Text>
         {documentNumber && (
-          <Text style={commonStyles.subtitle}>Nº {documentNumber}</Text>
+          <Text style={styles.subtitle}>Nº {documentNumber}</Text>
         )}
         {documentDate && (
-          <Text style={commonStyles.subtitle}>Fecha: {documentDate}</Text>
+          <Text style={styles.subtitle}>Fecha: {documentDate}</Text>
         )}
       </View>
     </View>

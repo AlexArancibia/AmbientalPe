@@ -31,6 +31,8 @@ export const companyRouter = router({
         email: z.string().email("Invalid email"),
         phone: z.string().min(1, "Phone is required"),
         logo: z.string().optional(),
+        primaryColor: z.string().optional(),
+        secondaryColor: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -67,6 +69,8 @@ export const companyRouter = router({
         email: z.string().email("Invalid email").optional(),
         phone: z.string().min(1, "Phone is required").optional(),
         logo: z.string().optional(),
+        primaryColor: z.string().optional(),
+        secondaryColor: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

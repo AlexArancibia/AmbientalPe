@@ -25,12 +25,11 @@ export async function GET(
     const company = await prisma.company.findFirst({
       include: {
         bankAccounts: {
-          where: {
-            OR: [
-              { isDefault: true },
-              { isDetraction: true },
-            ],
-          },
+          orderBy: [
+            { isDefault: "desc" },
+            { isDetraction: "desc" },
+            { bankName: "asc" },
+          ],
         },
       },
     });
@@ -95,20 +94,26 @@ export async function GET(
         days: item.days,
         unitPrice: Number(item.unitPrice),
       })),
-      company: company ? {
-        name: company.name,
-        ruc: company.ruc,
-        address: company.address,
-        email: company.email,
-        phone: company.phone,
-        logo: company.logo,
-        bankAccounts: {
-          defaultAccount:
-            company.bankAccounts.find((account) => account.isDefault) ?? null,
-          detractionAccount:
-            company.bankAccounts.find((account) => account.isDetraction) ?? null,
-        },
-      } : undefined,
+      company: company
+        ? {
+            name: company.name,
+            ruc: company.ruc,
+            address: company.address,
+            email: company.email,
+            phone: company.phone,
+            logo: company.logo,
+            bankAccounts: company.bankAccounts.map((account) => ({
+              bankName: account.bankName,
+              accountNumber: account.accountNumber,
+              accountType: account.accountType,
+              currency: account.currency,
+              isDefault: account.isDefault,
+              isDetraction: account.isDetraction,
+            })),
+            primaryColor: company.primaryColor,
+            secondaryColor: company.secondaryColor,
+          }
+        : undefined,
     };
 
     // Generate PDF stream

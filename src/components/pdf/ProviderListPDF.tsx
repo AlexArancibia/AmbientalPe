@@ -2,7 +2,8 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
-import { commonStyles, formatUtils } from './shared/pdf-styles';
+import { PDFBankAccountsSection, type PdfBankAccount } from './shared/PDFBankAccountsSection';
+import { createPdfTheme, formatUtils } from './shared/pdf-styles';
 
 const styles = StyleSheet.create({
   colName: { width: '28%' },
@@ -19,6 +20,9 @@ interface CompanySummary {
   email: string;
   phone: string;
   logo?: string | null;
+  bankAccounts?: PdfBankAccount[];
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
 }
 
 interface ProviderListPDFProps {
@@ -36,6 +40,12 @@ interface ProviderListPDFProps {
 }
 
 export const ProviderListPDF: React.FC<ProviderListPDFProps> = ({ providers, filters, company }) => {
+  const theme = createPdfTheme({
+    primaryColor: company?.primaryColor,
+    secondaryColor: company?.secondaryColor,
+  });
+  const commonStyles = theme.styles;
+
   return (
     <Document>
       <Page size="A4" style={commonStyles.page}>
@@ -44,6 +54,7 @@ export const ProviderListPDF: React.FC<ProviderListPDFProps> = ({ providers, fil
           documentTitle="LISTA DE PROVEEDORES"
           documentDate={formatUtils.currentDate()}
           showCompanyInfo={false}
+          theme={theme}
         />
 
         <View style={commonStyles.summarySection}>
@@ -90,6 +101,8 @@ export const ProviderListPDF: React.FC<ProviderListPDFProps> = ({ providers, fil
           </View>
         )}
 
+        <PDFBankAccountsSection accounts={company?.bankAccounts} theme={theme} />
+
         <PDFFooter
           company={
             company
@@ -100,6 +113,7 @@ export const ProviderListPDF: React.FC<ProviderListPDFProps> = ({ providers, fil
                 }
               : undefined
           }
+          theme={theme}
         />
       </Page>
     </Document>

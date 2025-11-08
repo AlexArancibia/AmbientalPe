@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
-import { commonStyles } from './pdf-styles';
+import { commonStyles as defaultStyles, type PdfTheme } from './pdf-styles';
 
 interface CompanyInfo {
   name: string;
@@ -12,24 +12,28 @@ interface PDFFooterProps {
   company?: CompanyInfo;
   customText?: string;
   showPageNumber?: boolean;
+  theme?: PdfTheme;
 }
 
 export const PDFFooter: React.FC<PDFFooterProps> = ({
   company,
   customText,
   showPageNumber = true,
+  theme,
 }) => {
+  const styles = theme?.styles ?? defaultStyles;
+
   return (
     <>
       {/* Footer */}
-      <View style={commonStyles.footer}>
+      <View style={styles.footer}>
         {customText && (
-          <Text style={commonStyles.footerText}>
+          <Text style={styles.footerText}>
             {customText}
           </Text>
         )}
         {company && (
-          <Text style={commonStyles.footerCompanyInfo}>
+          <Text style={styles.footerCompanyInfo}>
             {company.name} | {company.email} | {company.phone}
           </Text>
         )}
@@ -38,7 +42,7 @@ export const PDFFooter: React.FC<PDFFooterProps> = ({
       {/* Page Number */}
       {showPageNumber && (
         <Text 
-          style={commonStyles.pageNumber} 
+          style={styles.pageNumber} 
           render={({ pageNumber, totalPages }) => (
             `Página ${pageNumber} de ${totalPages}`
           )} 

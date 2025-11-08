@@ -2,7 +2,8 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
-import { commonStyles, colors, formatUtils } from './shared/pdf-styles';
+import { PDFBankAccountsSection, type PdfBankAccount } from './shared/PDFBankAccountsSection';
+import { createPdfTheme, formatUtils } from './shared/pdf-styles';
 
 // Estilos específicos para el reporte
 const reportStyles = StyleSheet.create({
@@ -39,6 +40,9 @@ interface QuotationListPDFProps {
     email: string;
     phone: string;
     logo?: string | null;
+    bankAccounts?: PdfBankAccount[];
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
   };
 }
 
@@ -48,6 +52,12 @@ export const QuotationListPDF: React.FC<QuotationListPDFProps> = ({
   summary,
   company 
 }) => {
+  const theme = createPdfTheme({
+    primaryColor: company?.primaryColor,
+    secondaryColor: company?.secondaryColor,
+  });
+  const commonStyles = theme.styles;
+
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       PENDING: 'Pendiente',
@@ -82,6 +92,7 @@ export const QuotationListPDF: React.FC<QuotationListPDFProps> = ({
           documentTitle="REPORTE DE COTIZACIONES"
           documentDate={formatUtils.currentDate()}
           showCompanyInfo={false}
+          theme={theme}
         />
 
         {/* Summary Section */}
@@ -155,6 +166,8 @@ export const QuotationListPDF: React.FC<QuotationListPDFProps> = ({
           </View>
         )}
 
+        <PDFBankAccountsSection accounts={company?.bankAccounts} theme={theme} />
+
         {/* Footer */}
         <PDFFooter
           company={company ? {
@@ -162,6 +175,7 @@ export const QuotationListPDF: React.FC<QuotationListPDFProps> = ({
             email: company.email,
             phone: company.phone,
           } : undefined}
+          theme={theme}
         />
       </Page>
     </Document>

@@ -353,6 +353,8 @@ model Company {
   email        String
   phone        String
   logo         String?
+  primaryColor String? @default("#000000")
+  secondaryColor String? @default("#000000")
   bankAccounts BankAccount[]
 
   @@map("companies")

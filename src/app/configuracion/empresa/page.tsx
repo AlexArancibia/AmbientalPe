@@ -56,6 +56,8 @@ export default function ConfiguracionEmpresaPage() {
     email: "",
     phone: "",
     logo: "",
+    primaryColor: "#1e3a8a",
+    secondaryColor: "#6b21a8",
   });
 
   const createInitialBankFormData = () => ({
@@ -78,6 +80,8 @@ export default function ConfiguracionEmpresaPage() {
         email: company.email,
         phone: company.phone,
         logo: company.logo || "",
+        primaryColor: company.primaryColor || "#1e3a8a",
+        secondaryColor: company.secondaryColor || "#6b21a8",
       });
     }
   }, [company]);
@@ -308,6 +312,62 @@ export default function ConfiguracionEmpresaPage() {
                   </p>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor">Color primario</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      id="primaryColor"
+                      type="color"
+                      value={formData.primaryColor}
+                      onChange={(e) =>
+                        setFormData({ ...formData, primaryColor: e.target.value })
+                      }
+                      disabled={!isEditing}
+                      className="h-10 w-16 p-1"
+                    />
+                    <Input
+                      value={formData.primaryColor}
+                      onChange={(e) =>
+                        setFormData({ ...formData, primaryColor: e.target.value })
+                      }
+                      disabled={!isEditing}
+                      className="flex-1"
+                      placeholder="#1e3a8a"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Se usa para títulos y acentos principales en PDFs.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="secondaryColor">Color secundario</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      id="secondaryColor"
+                      type="color"
+                      value={formData.secondaryColor}
+                      onChange={(e) =>
+                        setFormData({ ...formData, secondaryColor: e.target.value })
+                      }
+                      disabled={!isEditing}
+                      className="h-10 w-16 p-1"
+                    />
+                    <Input
+                      value={formData.secondaryColor}
+                      onChange={(e) =>
+                        setFormData({ ...formData, secondaryColor: e.target.value })
+                      }
+                      disabled={!isEditing}
+                      className="flex-1"
+                      placeholder="#6b21a8"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Se usa para etiquetas y elementos informativos en PDFs.
+                  </p>
+                </div>
+
                 {isEditing && (
                   <div className="md:col-span-2 flex justify-end space-x-2">
                     <Button
@@ -322,6 +382,8 @@ export default function ConfiguracionEmpresaPage() {
                             email: company.email,
                             phone: company.phone,
                             logo: company.logo || "",
+                            primaryColor: company.primaryColor || "#1e3a8a",
+                            secondaryColor: company.secondaryColor || "#6b21a8",
                           });
                         }
                       }}

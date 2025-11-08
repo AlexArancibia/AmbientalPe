@@ -2,67 +2,69 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
-import { commonStyles, colors, formatUtils } from './shared/pdf-styles';
+import { PDFBankAccountsSection, type PdfBankAccount } from './shared/PDFBankAccountsSection';
+import { createPdfTheme, formatUtils, type PdfPalette } from './shared/pdf-styles';
 
 // Estilos específicos para cotizaciones
-const quotationStyles = StyleSheet.create({
-  // Columnas de tabla específicas
-  col1: { width: '12%' }, // Código
-  col2: { width: '28%' }, // Descripción
-  col3: { width: '10%' }, // Cant
-  col4: { width: '10%' }, // Días
-  col5: { width: '15%' }, // P.Unit
-  col6: { width: '15%' }, // Subtotal
-  col7: { width: '10%' }, // Total
-  
-  // Información del cliente
-  clientBox: {
-    padding: 10,
-    backgroundColor: colors.gray,
-    borderRadius: 4,
-    border: `1 solid ${colors.border}`,
-    marginBottom: 15,
-  },
-  clientTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 6,
-  },
-  clientInfo: {
-    fontSize: 8,
-    marginBottom: 2,
-    color: colors.text,
-  },
-  
-  // Notas bancarias
-  bankSection: {
-    marginTop: 10,
-    padding: 8,
-    backgroundColor: colors.infoBg,
-    borderLeft: `3 solid ${colors.info}`,
-  },
-  bankTitle: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    color: colors.info,
-    marginBottom: 4,
-  },
-  bankGroup: {
-    marginTop: 6,
-  },
-  bankSubtitle: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  bankInfo: {
-    fontSize: 7,
-    color: colors.grayDark,
-    marginBottom: 1,
-  },
-});
+const createQuotationStyles = (palette: PdfPalette) =>
+  StyleSheet.create({
+    // Columnas de tabla específicas
+    col1: { width: '12%' }, // Código
+    col2: { width: '28%' }, // Descripción
+    col3: { width: '10%' }, // Cant
+    col4: { width: '10%' }, // Días
+    col5: { width: '15%' }, // P.Unit
+    col6: { width: '15%' }, // Subtotal
+    col7: { width: '10%' }, // Total
+
+    // Información del cliente
+    clientBox: {
+      padding: 10,
+      backgroundColor: palette.gray,
+      borderRadius: 4,
+      border: `1 solid ${palette.border}`,
+      marginBottom: 15,
+    },
+    clientTitle: {
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: palette.primary,
+      marginBottom: 6,
+    },
+    clientInfo: {
+      fontSize: 8,
+      marginBottom: 2,
+      color: palette.text,
+    },
+
+    // Notas bancarias
+    bankSection: {
+      marginTop: 10,
+      padding: 8,
+      backgroundColor: palette.infoBg,
+      borderLeft: `3 solid ${palette.info}`,
+    },
+    bankTitle: {
+      fontSize: 9,
+      fontWeight: 'bold',
+      color: palette.info,
+      marginBottom: 4,
+    },
+    bankGroup: {
+      marginTop: 6,
+    },
+    bankSubtitle: {
+      fontSize: 8,
+      fontWeight: 'bold',
+      color: palette.text,
+      marginBottom: 2,
+    },
+    bankInfo: {
+      fontSize: 7,
+      color: palette.grayDark,
+      marginBottom: 1,
+    },
+  });
 
 interface QuotationPDFProps {
   quotation: {
@@ -98,25 +100,20 @@ interface QuotationPDFProps {
       email: string;
       phone: string;
       logo?: string | null;
-      bankAccounts?: {
-        defaultAccount: {
-          bankName: string;
-          accountNumber: string;
-          accountType: string;
-          currency: string;
-        } | null;
-        detractionAccount: {
-          bankName: string;
-          accountNumber: string;
-          accountType: string;
-          currency: string;
-        } | null;
-      };
+      bankAccounts?: PdfBankAccount[];
     };
   };
 }
 
 export const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotation }) => {
+  const theme = createPdfTheme({
+    primaryColor: quotation.company?.primaryColor,
+    secondaryColor: quotation.company?.secondaryColor,
+  });
+  const commonStyles = theme.styles;
+  const palette = theme.colors;
+  const quotationStyles = createQuotationStyles(palette);
+
   return (
     <Document>
       <Page size="A4" style={commonStyles.page}>
@@ -126,6 +123,7 @@ export const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotation }) => {
           documentTitle="COTIZACIÓN"
           documentNumber={quotation.number}
           documentDate={formatUtils.date(quotation.date)}
+          theme={theme}
         />
 
         {/* Document Information */}
@@ -260,49 +258,7 @@ export const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotation }) => {
           </View>
         </View>
 
-        {/* Bank Account Information */}
-        {(quotation.company?.bankAccounts?.defaultAccount ||
-          quotation.company?.bankAccounts?.detractionAccount) && (
-          <View style={quotationStyles.bankSection}>
-            <Text style={quotationStyles.bankTitle}>DATOS BANCARIOS PARA PAGO</Text>
-            {quotation.company.bankAccounts?.defaultAccount && (
-              <View style={quotationStyles.bankGroup}>
-                <Text style={quotationStyles.bankSubtitle}>Cuenta Principal</Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Banco: </Text>
-                  {quotation.company.bankAccounts.defaultAccount.bankName}
-                </Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Número de Cuenta: </Text>
-                  {quotation.company.bankAccounts.defaultAccount.accountNumber}
-                </Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Tipo: </Text>
-                  {quotation.company.bankAccounts.defaultAccount.accountType} -{" "}
-                  {quotation.company.bankAccounts.defaultAccount.currency}
-                </Text>
-              </View>
-            )}
-            {quotation.company.bankAccounts?.detractionAccount && (
-              <View style={quotationStyles.bankGroup}>
-                <Text style={quotationStyles.bankSubtitle}>Cuenta de Detracción</Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Banco: </Text>
-                  {quotation.company.bankAccounts.detractionAccount.bankName}
-                </Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Número de Cuenta: </Text>
-                  {quotation.company.bankAccounts.detractionAccount.accountNumber}
-                </Text>
-                <Text style={quotationStyles.bankInfo}>
-                  <Text style={commonStyles.textBold}>Tipo: </Text>
-                  {quotation.company.bankAccounts.detractionAccount.accountType} -{" "}
-                  {quotation.company.bankAccounts.detractionAccount.currency}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
+        <PDFBankAccountsSection accounts={quotation.company?.bankAccounts} theme={theme} />
 
         {/* Notes */}
         {quotation.notes && (
@@ -319,7 +275,7 @@ export const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotation }) => {
             email: quotation.company.email,
             phone: quotation.company.phone,
           } : undefined}
-          customText="Cotización generada automáticamente"
+          theme={theme}
         />
       </Page>
     </Document>

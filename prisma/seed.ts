@@ -424,6 +424,8 @@ async function main() {
       email: "contacto@ambientalpe.com",
       phone: "+51 1 234 5678",
       logo: "/logo.png",
+      primaryColor: "#1e3a8a",
+      secondaryColor: "#6b21a8",
     },
   });
 

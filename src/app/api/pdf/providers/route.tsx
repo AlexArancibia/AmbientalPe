@@ -38,7 +38,17 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const company = await prisma.company.findFirst();
+    const company = await prisma.company.findFirst({
+      include: {
+        bankAccounts: {
+          orderBy: [
+            { isDefault: "desc" },
+            { isDetraction: "desc" },
+            { bankName: "asc" },
+          ],
+        },
+      },
+    });
 
     // Prepare data for PDF
     const pdfData = {
@@ -60,6 +70,16 @@ export async function GET(request: NextRequest) {
             email: company.email,
             phone: company.phone,
             logo: company.logo,
+            bankAccounts: company.bankAccounts.map((account) => ({
+              bankName: account.bankName,
+              accountNumber: account.accountNumber,
+              accountType: account.accountType,
+              currency: account.currency,
+              isDefault: account.isDefault,
+              isDetraction: account.isDetraction,
+            })),
+            primaryColor: company.primaryColor,
+            secondaryColor: company.secondaryColor,
           }
         : undefined,
     };

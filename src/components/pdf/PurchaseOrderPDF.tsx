@@ -2,10 +2,11 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { PDFHeader } from './shared/PDFHeader';
 import { PDFFooter } from './shared/PDFFooter';
-import { commonStyles, formatUtils } from './shared/pdf-styles';
+import { PDFBankAccountsSection, type PdfBankAccount } from './shared/PDFBankAccountsSection';
+import { createPdfTheme, formatUtils } from './shared/pdf-styles';
 import type { BadgeStyle } from './shared/pdf-styles';
 
-const styles = StyleSheet.create({
+const layoutStyles = StyleSheet.create({
   infoGrid: {
     display: 'flex',
     flexDirection: 'row',
@@ -36,6 +37,9 @@ interface CompanySummary {
   email: string;
   phone: string;
   logo?: string | null;
+  bankAccounts?: PdfBankAccount[];
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
 }
 
 interface PurchaseOrderPDFProps {
@@ -72,20 +76,27 @@ interface PurchaseOrderPDFProps {
   company?: CompanySummary;
 }
 
-const statusStyles: Record<string, { label: string; style: BadgeStyle }> = {
-  pending: { label: 'PENDIENTE', style: commonStyles.badgePending },
-  in_progress: { label: 'EN PROGRESO', style: commonStyles.badgeInProgress },
-  completed: { label: 'COMPLETADA', style: commonStyles.badgeCompleted },
-  cancelled: { label: 'CANCELADA', style: commonStyles.badgeCancelled },
-  approved: { label: 'APROBADA', style: commonStyles.badgeApproved },
-};
-
 export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrder, company }) => {
-  const statusKey = purchaseOrder.status.toLowerCase();
-  const status = statusStyles[statusKey] ?? {
-    label: purchaseOrder.status.toUpperCase(),
-    style: commonStyles.badgeDraft,
+  const theme = createPdfTheme({
+    primaryColor: company?.primaryColor,
+    secondaryColor: company?.secondaryColor,
+  });
+  const commonStyles = theme.styles;
+
+  const statusStyles: Record<string, { label: string; style: BadgeStyle }> = {
+    pending: { label: 'PENDIENTE', style: commonStyles.badgePending as BadgeStyle },
+    in_progress: { label: 'EN PROGRESO', style: commonStyles.badgeInProgress as BadgeStyle },
+    completed: { label: 'COMPLETADA', style: commonStyles.badgeCompleted as BadgeStyle },
+    cancelled: { label: 'CANCELADA', style: commonStyles.badgeCancelled as BadgeStyle },
+    approved: { label: 'APROBADA', style: commonStyles.badgeApproved as BadgeStyle },
   };
+
+  const statusKey = purchaseOrder.status.toLowerCase();
+  const status =
+    statusStyles[statusKey] ?? {
+      label: purchaseOrder.status.toUpperCase(),
+      style: commonStyles.badgeDraft as BadgeStyle,
+    };
 
   return (
     <Document>
@@ -95,9 +106,10 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
           documentTitle="ORDEN DE COMPRA"
           documentNumber={purchaseOrder.number}
           documentDate={formatUtils.date(purchaseOrder.date)}
+          theme={theme}
         />
 
-        <View style={styles.badgeContainer}>
+        <View style={layoutStyles.badgeContainer}>
           <View style={[commonStyles.badge, status.style]}>
             <Text>{status.label}</Text>
           </View>
@@ -105,20 +117,20 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
 
         <View style={commonStyles.section}>
           <Text style={commonStyles.sectionTitle}>INFORMACIÓN DEL PROVEEDOR</Text>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoBox}>
+          <View style={layoutStyles.infoGrid}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Proveedor</Text>
               <Text style={commonStyles.value}>{purchaseOrder.client.name}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>RUC</Text>
               <Text style={commonStyles.value}>{purchaseOrder.client.ruc}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Email</Text>
               <Text style={commonStyles.value}>{purchaseOrder.client.email}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Dirección</Text>
               <Text style={commonStyles.value}>{purchaseOrder.client.address}</Text>
             </View>
@@ -127,27 +139,27 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
 
         <View style={commonStyles.section}>
           <Text style={commonStyles.sectionTitle}>DETALLES DE LA ORDEN</Text>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoBox}>
+          <View style={layoutStyles.infoGrid}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Fecha de Emisión</Text>
               <Text style={commonStyles.value}>{formatUtils.dateLong(purchaseOrder.date)}</Text>
             </View>
-            <View style={styles.infoBox}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Gestor</Text>
               <Text style={commonStyles.value}>{purchaseOrder.gestor.name}</Text>
             </View>
             {purchaseOrder.attendantName && (
-              <View style={styles.infoBox}>
+              <View style={layoutStyles.infoBox}>
                 <Text style={commonStyles.label}>Encargado</Text>
                 <Text style={commonStyles.value}>{purchaseOrder.attendantName}</Text>
               </View>
             )}
-            <View style={styles.infoBox}>
+            <View style={layoutStyles.infoBox}>
               <Text style={commonStyles.label}>Moneda</Text>
               <Text style={commonStyles.value}>{purchaseOrder.currency}</Text>
             </View>
             {purchaseOrder.paymentTerms && (
-              <View style={styles.infoBox}>
+              <View style={layoutStyles.infoBox}>
                 <Text style={commonStyles.label}>Términos de Pago</Text>
                 <Text style={commonStyles.value}>{purchaseOrder.paymentTerms}</Text>
               </View>
@@ -165,12 +177,12 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
         {purchaseOrder.items.length > 0 ? (
           <View style={commonStyles.table}>
             <View style={commonStyles.tableHeader}>
-              <Text style={styles.tableColCode}>Código</Text>
-              <Text style={styles.tableColDescription}>Descripción</Text>
-              <Text style={styles.tableColName}>Nombre</Text>
-              <Text style={styles.tableColQuantity}>Cantidad</Text>
-              <Text style={styles.tableColPrice}>P. Unit.</Text>
-              <Text style={styles.tableColTotal}>Total</Text>
+              <Text style={layoutStyles.tableColCode}>Código</Text>
+              <Text style={layoutStyles.tableColDescription}>Descripción</Text>
+              <Text style={layoutStyles.tableColName}>Nombre</Text>
+              <Text style={layoutStyles.tableColQuantity}>Cantidad</Text>
+              <Text style={layoutStyles.tableColPrice}>P. Unit.</Text>
+              <Text style={layoutStyles.tableColTotal}>Total</Text>
             </View>
             {purchaseOrder.items.map((item, index) => {
               const total = item.quantity * item.unitPrice;
@@ -179,16 +191,16 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
                   key={`${item.code}-${index}`}
                   style={index % 2 === 0 ? commonStyles.tableRow : commonStyles.tableRowAlt}
                 >
-                  <Text style={styles.tableColCode}>{item.code}</Text>
-                  <View style={styles.tableColDescription}>
+                  <Text style={layoutStyles.tableColCode}>{item.code}</Text>
+                  <View style={layoutStyles.tableColDescription}>
                     <Text style={commonStyles.tableCell}>{item.description}</Text>
                   </View>
-                  <Text style={styles.tableColName}>{item.name}</Text>
-                  <Text style={styles.tableColQuantity}>{item.quantity}</Text>
-                  <Text style={styles.tableColPrice}>
+                  <Text style={layoutStyles.tableColName}>{item.name}</Text>
+                  <Text style={layoutStyles.tableColQuantity}>{item.quantity}</Text>
+                  <Text style={layoutStyles.tableColPrice}>
                     {formatUtils.currency(item.unitPrice, purchaseOrder.currency)}
                   </Text>
-                  <Text style={styles.tableColTotal}>
+                  <Text style={layoutStyles.tableColTotal}>
                     {formatUtils.currency(total, purchaseOrder.currency)}
                   </Text>
                 </View>
@@ -229,6 +241,8 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
           </View>
         )}
 
+        <PDFBankAccountsSection accounts={company?.bankAccounts} theme={theme} />
+
         <PDFFooter
           company={
             company
@@ -239,7 +253,7 @@ export const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({ purchaseOrde
                 }
               : undefined
           }
-          customText={`Orden de compra generada el ${formatUtils.currentDate()}`}
+          theme={theme}
         />
       </Page>
     </Document>

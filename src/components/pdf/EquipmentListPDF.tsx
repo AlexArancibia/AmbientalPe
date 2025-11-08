@@ -39,14 +39,16 @@ interface EquipmentListPDFProps {
   company?: CompanySummary;
 }
 
-const statusMap: Record<string, { label: string; style: object }> = {
+type BadgeStyle = typeof commonStyles.badgePending;
+
+const statusMap: Record<string, { label: string; style: BadgeStyle }> = {
   available: { label: 'Disponible', style: commonStyles.badgeCompleted },
   in_use: { label: 'En uso', style: commonStyles.badgeInProgress },
   maintenance: { label: 'Mantenimiento', style: commonStyles.badgePending },
   inactive: { label: 'Inactivo', style: commonStyles.badgeDraft },
 };
 
-const resolveStatus = (status: string) => {
+const resolveStatus = (status: string): { label: string; style: BadgeStyle } => {
   const key = status.toLowerCase();
   if (statusMap[key]) {
     return statusMap[key];

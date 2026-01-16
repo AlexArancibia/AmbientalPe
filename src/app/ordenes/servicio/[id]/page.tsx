@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileCheck, ArrowLeft, Save, Loader2, Plus, Trash2, Edit, Calendar, User, Search, ChevronDown, ChevronUp, Check, FileDown, Printer } from "lucide-react";
+import { FileCheck, ArrowLeft, Save, Loader2, Plus, Trash2, Edit, Calendar, User, Search, ChevronDown, ChevronUp, Check, FileDown, Printer, X } from "lucide-react";
 import { trpc } from "@/utils/trpc";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CompanyType } from "@prisma/client";
@@ -99,6 +99,10 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
     unitPrice: 0,
     saveAsTemplate: false,
   });
+
+  // Item editing states
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<ServiceOrderItem | null>(null);
 
   // Get service order
   const { data: serviceOrder, isLoading, refetch } = trpc.serviceOrder.getById.useQuery({
@@ -305,6 +309,39 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
       ...formData,
       items: formData.items.filter((item) => item.id !== id),
     });
+  };
+
+  const handleEditItem = (itemId: string) => {
+    const item = formData.items.find((item) => item.id === itemId);
+    if (item) {
+      setEditingItem({ ...item });
+      setEditingItemId(itemId);
+    }
+  };
+
+  const handleUpdateItem = () => {
+    if (!editingItem || !editingItemId) return;
+
+    if (!editingItem.code || !editingItem.name || !editingItem.description) {
+      toast.error("Por favor complete todos los campos requeridos");
+      return;
+    }
+
+    setFormData({
+      ...formData,
+      items: formData.items.map((item) =>
+        item.id === editingItemId ? { ...editingItem } : item
+      ),
+    });
+
+    setEditingItem(null);
+    setEditingItemId(null);
+    toast.success("Item actualizado");
+  };
+
+  const handleCancelEditItem = () => {
+    setEditingItem(null);
+    setEditingItemId(null);
   };
 
   const handleUpdateTemplate = async () => {
@@ -527,7 +564,7 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
         <div className="grid gap-6 md:grid-cols-3">
           {/* Main Content - 2/3 */}
           <div className="md:col-span-2 space-y-6">
-            <form onSubmit={handleSubmit}>
+            <form id="service-order-form" onSubmit={handleSubmit}>
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Información General</CardTitle>
@@ -641,6 +678,28 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
                     </div>
 
                     <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Estado</Label>
+                      {isEditMode ? (
+                        <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PENDING">Pendiente</SelectItem>
+                            <SelectItem value="APPROVED">Aprobada</SelectItem>
+                            <SelectItem value="IN_PROGRESS">En Progreso</SelectItem>
+                            <SelectItem value="COMPLETED">Completada</SelectItem>
+                            <SelectItem value="CANCELLED">Cancelada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Badge variant="outline" className={statusBadge.className}>
+                          {statusBadge.label}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Términos de Pago</Label>
                       {isEditMode ? (
                         <Input
@@ -690,37 +749,6 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
                       )}
                     </div>
                   </div>
-
-                  {isEditMode && (
-                    <div className="flex space-x-2 pt-4 border-t">
-                      <Button
-                        type="submit"
-                        size="sm"
-                        disabled={updateMutation.isPending}
-                      >
-                        {updateMutation.isPending ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Guardando...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="h-4 w-4 mr-2" />
-                            Guardar
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleCancel}
-                        disabled={updateMutation.isPending}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </form>
@@ -1108,43 +1136,144 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
                       <div className="border border-border rounded-lg divide-y divide-border max-h-[300px] overflow-y-auto">
                         {formData.items.map((item) => (
                           <div key={item.id} className="p-2.5 flex items-start gap-2.5 hover:bg-muted/30">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2 mb-0.5">
-                                <div className="font-medium text-sm truncate">
-                                  {item.code} - {item.name}
-                                  {item.saveAsTemplate && (
-                                    <span className="ml-2 text-xs text-blue-600 font-normal">(Se guardará como template)</span>
-                                  )}
+                            {editingItemId === item.id && editingItem ? (
+                              // Edit Mode
+                              <div className="flex-1 space-y-2 pt-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Código *</Label>
+                                    <Input
+                                      value={editingItem.code}
+                                      onChange={(e) => setEditingItem({ ...editingItem, code: e.target.value })}
+                                      placeholder="SERV-001"
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Nombre *</Label>
+                                    <Input
+                                      value={editingItem.name}
+                                      onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                                      placeholder="Nombre del item"
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
                                 </div>
-                                {isEditMode && (
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Descripción *</Label>
+                                  <Textarea
+                                    value={editingItem.description}
+                                    onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                                    rows={2}
+                                    placeholder="Descripción del servicio..."
+                                    className="resize-none text-sm"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Cantidad *</Label>
+                                    <Input
+                                      type="number"
+                                      value={editingItem.quantity}
+                                      onChange={(e) => setEditingItem({ ...editingItem, quantity: parseInt(e.target.value) || 1 })}
+                                      min="1"
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Días</Label>
+                                    <Input
+                                      type="number"
+                                      value={editingItem.days ?? 1}
+                                      onChange={(e) => setEditingItem({ ...editingItem, days: e.target.value ? parseInt(e.target.value) : null })}
+                                      min="1"
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Precio Unit. *</Label>
+                                    <Input
+                                      type="number"
+                                      value={editingItem.unitPrice}
+                                      onChange={(e) => setEditingItem({ ...editingItem, unitPrice: parseFloat(e.target.value) || 0 })}
+                                      min="0"
+                                      step="0.01"
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
                                   <Button
                                     type="button"
-                                    variant="ghost"
                                     size="sm"
-                                    onClick={() => handleRemoveItem(item.id!)}
-                                    className="h-6 w-6 p-0 shrink-0 text-red-600 hover:text-red-700"
+                                    onClick={handleUpdateItem}
+                                    className="h-6 text-xs flex-1"
                                   >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Check className="h-3 w-3 mr-1" />
+                                    Guardar
                                   </Button>
-                                )}
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelEditItem}
+                                    className="h-6 text-xs"
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
                               </div>
-                              <p className="text-xs text-muted-foreground line-clamp-1 mb-1">
-                                {item.description}
-                              </p>
-                              <div className="flex gap-3 text-xs text-muted-foreground">
-                                <span>Cant: {item.quantity}</span>
-                                <span>Días: {item.days ?? 0}</span>
-                          <span>
-                                  {formData.currency === "PEN" ? "S/" : "$"} {item.unitPrice.toFixed(2)}
-                                </span>
-                                <span className="font-medium">
-                                  Total: {formData.currency === "PEN" ? "S/" : "$"}{" "}
-                                  {(item.quantity * (item.days ?? 0) * item.unitPrice).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                            ) : (
+                              // View Mode
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2 mb-0.5">
+                                  <div className="font-medium text-sm truncate">
+                                    {item.code} - {item.name}
+                                    {item.saveAsTemplate && (
+                                      <span className="ml-2 text-xs text-blue-600 font-normal">(Se guardará como template)</span>
+                                    )}
+                                  </div>
+                                  {isEditMode && (
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleEditItem(item.id!)}
+                                        className="h-6 w-6 p-0 shrink-0 text-blue-600 hover:text-blue-700"
+                                      >
+                                        <Edit className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleRemoveItem(item.id!)}
+                                        className="h-6 w-6 p-0 shrink-0 text-red-600 hover:text-red-700"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground line-clamp-1 mb-1">
+                                  {item.description}
+                                </p>
+                                <div className="flex gap-3 text-xs text-muted-foreground">
+                                  <span>Cant: {item.quantity}</span>
+                                  <span>Días: {item.days ?? 0}</span>
+                                  <span>
+                                    {formData.currency === "PEN" ? "S/" : "$"} {item.unitPrice.toFixed(2)}
+                                  </span>
+                                  <span className="font-medium">
+                                    Total: {formData.currency === "PEN" ? "S/" : "$"}{" "}
+                                    {(item.quantity * (item.days ?? 0) * item.unitPrice).toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                 </div>
 
@@ -1176,7 +1305,44 @@ export default function ServiceOrderDetailPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Sidebar - 1/3 */}
-          <div className="space-y-4">
+          <div className="space-y-4 sticky top-6">
+            {isEditMode && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Acciones</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button
+                    type="submit"
+                    form="service-order-form"
+                    className="w-full"
+                    disabled={updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Guardar Cambios
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="w-full"
+                    disabled={updateMutation.isPending}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancelar
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
